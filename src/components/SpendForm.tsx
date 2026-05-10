@@ -236,7 +236,7 @@ function normalizeDraft(draft: unknown) {
 
   if (rawToolEntries) {
     return {
-      step: Math.min(Math.max(Number(candidate.step || 1), 1), 3),
+      step: Math.min(Math.max(Number(candidate.step || 1), 1), 4),
       companyName: typeof candidate.companyName === 'string' ? candidate.companyName : '',
       industry:
         typeof candidate.industry === 'string' && INDUSTRIES.includes(candidate.industry as (typeof INDUSTRIES)[number])
@@ -282,7 +282,7 @@ function normalizeDraft(draft: unknown) {
     .filter((entry): entry is RichToolEntry => Boolean(entry))
 
   return {
-    step: Math.min(Math.max(Number(candidate.step || 1), 1), 3),
+    step: Math.min(Math.max(Number(candidate.step || 1), 1), 4),
     companyName: '',
     industry: 'Other' as (typeof INDUSTRIES)[number],
     estimatedMonthlyBudget: 0,
@@ -409,18 +409,15 @@ export function SpendForm() {
   }
 
   const goToToolDetails = () => {
-    if (companyName.trim().length === 0) {
-      window.alert('Please enter a team or company name')
-      return
-    }
-
     if (toolEntries.length === 0) {
       window.alert('Please add at least one tool')
       return
     }
 
-    setStep(2)
+    setStep(3)
   }
+
+  
 
   const handleSubmit = async () => {
     if (tools.length === 0) {
@@ -472,7 +469,7 @@ export function SpendForm() {
                 Audit flow
               </div>
               <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Audit your AI spend</h1>
-              <p className="mt-2 text-sm text-slate-400">Step {step} of 3. Drafts save automatically to your browser.</p>
+              <p className="mt-2 text-sm text-slate-400">Step {step} of 4. Drafts save automatically to your browser.</p>
             </div>
             <div className="hidden rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-right sm:block">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Current monthly spend</p>
@@ -483,7 +480,7 @@ export function SpendForm() {
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-lime-300 transition-all duration-300"
-              style={{ width: `${(step / 3) * 100}%` }}
+              style={{ width: `${(step / 4) * 100}%` }}
             />
           </div>
         </div>
@@ -501,84 +498,7 @@ export function SpendForm() {
               <p className="hidden text-sm text-slate-400 sm:block">Auto-saves on every change.</p>
             </div>
 
-            <div className="mt-6 grid gap-6 lg:grid-cols-[0.95fr_1.25fr]">
-              <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Company profile</h3>
-                    <p className="mt-1 text-sm text-slate-400">Foundational details for the spend audit.</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
-                    <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Team / company name</span>
-                    <input
-                      type="text"
-                      value={companyName}
-                      onChange={event => setCompanyName(event.target.value)}
-                      placeholder="e.g. Northstar AI"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-400/40"
-                    />
-                  </label>
-
-                  <label className="space-y-2 text-sm text-slate-300">
-                    <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Team size</span>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={teamSize}
-                      onChange={event => setTeamSize(Math.max(1, Number(event.target.value) || 1))}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                    />
-                  </label>
-
-                  <label className="space-y-2 text-sm text-slate-300">
-                    <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Industry</span>
-                    <select
-                      value={industry}
-                      onChange={event => setIndustry(event.target.value as (typeof INDUSTRIES)[number])}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                    >
-                      {INDUSTRIES.map(industryOption => (
-                        <option key={industryOption} value={industryOption} className="bg-slate-950 text-white">
-                          {industryOption}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="space-y-2 text-sm text-slate-300">
-                    <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Primary AI usage</span>
-                    <select
-                      value={useCase}
-                      onChange={event => setUseCase(event.target.value as UseCase)}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                    >
-                      {USE_CASES.map(caseOption => (
-                        <option key={caseOption} value={caseOption} className="bg-slate-950 text-white">
-                          {caseOption.charAt(0).toUpperCase() + caseOption.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
-                    <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Estimated monthly AI budget</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={estimatedMonthlyBudget}
-                      onChange={event => setEstimatedMonthlyBudget(Math.max(0, Number(event.target.value) || 0))}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                    />
-                    <p className="text-xs text-slate-500">Current estimate: {formatMoney(estimatedMonthlyBudget)}</p>
-                  </label>
-                </div>
-              </div>
-
+            <div className="mt-6">
               <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
