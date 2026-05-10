@@ -236,7 +236,7 @@ function normalizeDraft(draft: unknown) {
 
   if (rawToolEntries) {
     return {
-      step: Math.min(Math.max(Number(candidate.step || 1), 1), 4),
+      step: Math.min(Math.max(Number(candidate.step || 1), 1), 2),
       companyName: typeof candidate.companyName === 'string' ? candidate.companyName : '',
       industry:
         typeof candidate.industry === 'string' && INDUSTRIES.includes(candidate.industry as (typeof INDUSTRIES)[number])
@@ -282,7 +282,7 @@ function normalizeDraft(draft: unknown) {
     .filter((entry): entry is RichToolEntry => Boolean(entry))
 
   return {
-    step: Math.min(Math.max(Number(candidate.step || 1), 1), 4),
+    step: Math.min(Math.max(Number(candidate.step || 1), 1), 2),
     companyName: '',
     industry: 'Other' as (typeof INDUSTRIES)[number],
     estimatedMonthlyBudget: 0,
@@ -414,7 +414,7 @@ export function SpendForm() {
       return
     }
 
-    setStep(3)
+    setStep(2)
   }
 
   
@@ -469,7 +469,7 @@ export function SpendForm() {
                 Audit flow
               </div>
               <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Audit your AI spend</h1>
-              <p className="mt-2 text-sm text-slate-400">Step {step} of 4. Drafts save automatically to your browser.</p>
+                <p className="mt-2 text-sm text-slate-400">Step {step} of 2. Drafts save automatically to your browser.</p>
             </div>
             <div className="hidden rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-right sm:block">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Current monthly spend</p>
@@ -480,7 +480,7 @@ export function SpendForm() {
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-lime-300 transition-all duration-300"
-              style={{ width: `${(step / 4) * 100}%` }}
+               style={{ width: `${(step / 2) * 100}%` }}
             />
           </div>
         </div>
@@ -703,110 +703,11 @@ export function SpendForm() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm uppercase tracking-[0.18em] text-emerald-200/80">Step 2</p>
-                <h2 className="mt-1 text-2xl font-semibold text-white">Tell us how each tool is configured</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </button>
-            </div>
-
-            <div className="mt-6 grid gap-4">
-              {tools.map(tool => {
-                const toolConfig = TOOLS[tool.toolId as keyof typeof TOOLS]
-
-                return (
-                  <article key={tool.toolId} className="rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-5">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">{toolConfig.name}</h3>
-                        <p className="mt-1 text-sm text-slate-400">Plan, seat count, and monthly spend for this tool.</p>
-                      </div>
-                      <div className="text-sm text-slate-400">
-                        Est. current spend: <span className="font-semibold text-white">{formatMoney(tool.monthlySpend)}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-4 md:grid-cols-3">
-                      <label className="space-y-2 text-sm text-slate-300">
-                        <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Plan</span>
-                        <select
-                          value={tool.plan}
-                          onChange={event => updateTool(tool.toolId, 'plan', event.target.value)}
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                        >
-                          {Object.entries(toolConfig.plans).map(([planKey, plan]) => (
-                            <option key={planKey} value={planKey} className="bg-slate-950 text-white">
-                              {plan.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <label className="space-y-2 text-sm text-slate-300">
-                        <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Seats</span>
-                        <input
-                          type="number"
-                          min="1"
-                          step="1"
-                          value={tool.seats}
-                          onChange={event => updateTool(tool.toolId, 'seats', Math.max(1, Number(event.target.value) || 1))}
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                        />
-                      </label>
-
-                      <label className="space-y-2 text-sm text-slate-300">
-                        <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Monthly spend</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={tool.monthlySpend}
-                          onChange={event => updateTool(tool.toolId, 'monthlySpend', Number(event.target.value) || 0)}
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
-                        />
-                      </label>
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-
-            <div className="mt-6 flex justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep(3)}
-                className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-emerald-300"
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </section>
-        ) : null}
-
-        {step === 3 ? (
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/15 backdrop-blur">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm uppercase tracking-[0.18em] text-emerald-200/80">Step 3</p>
                 <h2 className="mt-1 text-2xl font-semibold text-white">Team size and use case</h2>
               </div>
               <button
                 type="button"
-                onClick={() => setStep(2)}
+                onClick={() => setStep(1)}
                 className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/10"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -859,15 +760,7 @@ export function SpendForm() {
               </div>
             </div>
 
-            <div className="mt-8 flex justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setStep(2)}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </button>
+            <div className="mt-8 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={handleSubmit}
