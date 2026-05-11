@@ -168,7 +168,9 @@ function normalizeRichToolEntry(entry: Partial<RichToolEntry> & { id?: string })
     planId: planExists ? (entry.planId as string) : defaultPlan.id,
     monthlySpend: Number(entry.monthlySpend ?? 0),
     seats: Math.max(1, Number(entry.seats ?? 1)),
-    billingType: entry.billingType === 'api-usage' || entry.billingType === 'hybrid' ? entry.billingType : 'subscription',
+    billingType: (['subscription', 'api-usage', 'hybrid'] as const).includes(entry.billingType as BillingType)
+      ? (entry.billingType as BillingType)
+      : 'subscription',
     useCases: Array.isArray(entry.useCases) && entry.useCases.length > 0 ? Array.from(new Set(entry.useCases)) as UsageFocus[] : ['mixed'],
     usageFrequency: entry.usageFrequency === 'weekly' || entry.usageFrequency === 'occasionally' ? entry.usageFrequency : 'daily',
     notes: typeof entry.notes === 'string' ? entry.notes : '',
@@ -179,11 +181,20 @@ function richToolEntryToAuditTool(entry: RichToolEntry): ToolInput {
   const provider = TOOL_CONFIG[entry.providerId]
   const plan = provider.plans.find(option => option.id === entry.planId) ?? getDefaultProviderPlan(entry.providerId)
 
+  // Map form's billing type to types.ts BillingType ('api-usage' -> 'api')
+  const billingType: any = entry.billingType === 'api-usage' ? 'api' : entry.billingType
+
+  // Per-tool use case: pick the first selected use case, fall back to 'mixed'
+  const useCase: UseCase = (entry.useCases[0] ?? 'mixed') as UseCase
+
   return {
     toolId: provider.toolId,
     plan: plan.auditPlan,
     seats: entry.seats,
     monthlySpend: entry.monthlySpend,
+    billingType,
+    useCase,
+    usageFrequency: entry.usageFrequency,
   }
 }
 
@@ -213,6 +224,9 @@ function createTool(toolId: keyof typeof TOOLS): ToolInput {
     plan,
     seats: 1,
     monthlySpend: planConfig[plan]?.pricePerSeat ?? 0,
+    billingType: 'subscription',
+    useCase: 'mixed',
+    usageFrequency: 'daily',
   }
 }
 
