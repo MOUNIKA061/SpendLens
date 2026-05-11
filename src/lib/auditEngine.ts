@@ -217,7 +217,7 @@ function checkCrossToolAlternative(
   toolId: ToolId,
   seats: number,
   currentSpend: number,
-  useCase: UseCase
+  useCase: UseCase,
 ): { action: string; savings: number; reason: string } | null {
   const alternatives = USE_CASE_ALTERNATIVES[useCase] ?? []
 
@@ -247,7 +247,7 @@ function checkCrossToolAlternative(
   return {
     action: `Switch to ${altTool.name} ${altPlan.label}`,
     savings: bestSavings,
-    reason: `For ${useCase} work, ${altTool.name} ${altPlan.label} costs $${bestAlt.cost}/mo for ${seats} seat${seats > 1 ? 's' : ''} vs your current $${currentSpend}/mo - saving $${bestSavings}/mo. ${bestAlt.reason}`,
+    reason: `For ${useCase} work, ${altTool.name} ${altPlan.label} costs $${bestAlt.cost}/mo for ${seats} seat${seats > 1 ? 's' : ''} vs your current $${currentSpend}/mo — saving $${bestSavings}/mo. ${bestAlt.reason}`,
   }
 }
 
@@ -270,23 +270,100 @@ function checkCreditsOpportunity(
 function checkApiVsSubscription(
   toolId: ToolId,
   currentSpend: number,
-  useCase: UseCase
+  useCase: UseCase,
+  usageFrequency: 'daily' | 'weekly' | 'occasionally'
 ): { action: string; savings: number; reason: string } | null {
-  if (useCase !== 'data' && useCase !== 'mixed') return null
-  if (currentSpend < 40) return null
-
-  const hasApiEquivalent =
-    (toolId === 'claude' || toolId === 'chatgpt')
-
+  // Only recommend API for certain use cases or based on usage frequency thresholds
+  const hasApiEquivalent = (toolId === 'claude' || toolId === 'chatgpt')
   if (!hasApiEquivalent) return null
 
+  // Usage-frequency rules
+  if (usageFrequency === 'daily') {
+    if (currentSpend <= 100) return null // subscription likely worth it
+  }
+
+  if (usageFrequency === 'weekly') {
+    if (currentSpend <= 50) return null
+  }
+
+  // occasionally: always suggest API or free if available
+  if (usageFrequency === 'occasionally') {
+    // prefer free tier downgrade if available
+    const plans = TOOLS[toolId].plans as Record<string, PlanConfig>
+    const freePlanKey = Object.keys(plans).find(k => plans[k].pricePerSeat === 0)
+    if (freePlanKey) {
+      const freeCost = 0
+      const savings = Math.round(currentSpend - freeCost)
+      if (savings > 10) {
+        return {
+          action: `Downgrade to ${TOOLS[toolId].name} ${plans[freePlanKey].label}`,
+          savings,
+          reason: `You're paying $${currentSpend}/mo but using ${usageFrequency} — downgrading to ${plans[freePlanKey].label} at $${freeCost}/mo saves $${savings}/mo. Consider API or free tier instead.`,
+        }
+      }
+    }
+
+    // fallback: recommend evaluating API
+    const apiToolId: ToolId = toolId === 'claude' ? 'anthropic_api' : 'openai_api'
+    const apiTool = TOOLS[apiToolId]
+    return {
+      action: `Evaluate switching to ${apiTool.name} (usage-based)`,
+      savings: 0,
+      reason: `You're paying $${currentSpend}/mo but using this tool ${usageFrequency} — consider switching to ${apiTool.name} (pay-per-use) or a free tier to avoid overpaying.`,
+    }
+  }
+
+  // For daily/weekly where thresholds passed, surface an API investigation recommendation
   const apiToolId: ToolId = toolId === 'claude' ? 'anthropic_api' : 'openai_api'
   const apiTool = TOOLS[apiToolId]
-
   return {
     action: `Evaluate switching to ${apiTool.name} (usage-based)`,
     savings: 0,
-    reason: `At $${currentSpend}/mo on a flat subscription for ${useCase} work, you may save by switching to ${apiTool.name} (pay-per-token). This is worth investigating if your usage is uneven across the month - flat plans overpay during slow weeks.`,
+    reason: `At $${currentSpend}/mo on a flat subscription for ${useCase} work, consider whether ${apiTool.name} (pay-per-token) could lower costs during slow weeks.`,
+  }
+}
+
+// Helper: for an API-billed tool, compare its spend vs cheapest subscription alternative
+function compareApiBillingToSubscription(
+  toolId: ToolId,
+  seats: number,
+  currentSpend: number,
+  useCase: UseCase
+): { action: string; savings: number; reason: string } | null {
+  const alternatives = USE_CASE_ALTERNATIVES[useCase] ?? []
+  let cheapest: { toolId: ToolId; planKey: string; cost: number; label: string } | null = null
+
+  for (const alt of alternatives) {
+    const cost = getPlanCost(alt.toolId, alt.planKey, seats)
+    if (cost === null) continue
+    if (!cheapest || cost < cheapest.cost) {
+      const altTool = TOOLS[alt.toolId]
+      const altPlans = altTool.plans as Record<string, PlanConfig>
+      const altPlan = altPlans[alt.planKey]
+      if (!altPlan) continue
+      cheapest = { toolId: alt.toolId, planKey: alt.planKey, cost, label: altPlan.label }
+    }
+  }
+
+  if (!cheapest) return null
+
+  const subscriptionCost = cheapest.cost
+  const savings = Math.round(subscriptionCost - currentSpend)
+
+  if (subscriptionCost + 10 < currentSpend) {
+    // subscription clearly cheaper
+    return {
+      action: `Switch to ${TOOLS[cheapest.toolId].name} ${cheapest.label}`,
+      savings: Math.round(currentSpend - subscriptionCost),
+      reason: `Your API spend is $${currentSpend}/mo. A ${TOOLS[cheapest.toolId].name} ${cheapest.label} subscription costs $${subscriptionCost}/mo for ${seats} seat${seats > 1 ? 's' : ''} — switching would save $${Math.round(currentSpend - subscriptionCost)}/mo.`,
+    }
+  }
+
+  // API is cheaper or similar
+  return {
+    action: `Keep API (cost-effective)`,
+    savings: 0,
+    reason: `Your API spend is $${currentSpend}/mo which compares favorably to the cheapest subscription option at $${subscriptionCost}/mo for ${seats} seat${seats > 1 ? 's' : ''}.`,
   }
 }
 
@@ -304,17 +381,54 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
 
     const currentSpend = tool.monthlySpend
     const seats = tool.seats
+    const billingType = (tool as any).billingType ?? 'subscription'
+    const toolUseCase = ((tool as any).useCase as UseCase) ?? input.useCase
+    const usageFrequency = (tool as any).usageFrequency ?? 'daily'
 
     const candidates: { action: string; savings: number; reason: string }[] = []
 
-    const rightSize = checkRightSize(toolId, tool.plan, seats, currentSpend)
-    if (rightSize) candidates.push(rightSize)
+    // Behaviour varies by billing type
+    if (billingType === 'subscription' || billingType === 'hybrid') {
+      const rightSize = checkRightSize(toolId, tool.plan, seats, currentSpend)
+      if (rightSize) candidates.push(rightSize)
 
-    const crossTool = checkCrossToolAlternative(toolId, seats, currentSpend, input.useCase)
-    if (crossTool) candidates.push(crossTool)
+      const crossTool = checkCrossToolAlternative(toolId, seats, currentSpend, toolUseCase)
+      if (crossTool) candidates.push(crossTool)
 
-    const apiCheck = checkApiVsSubscription(toolId, currentSpend, input.useCase)
-    if (apiCheck) candidates.push(apiCheck)
+      // API investigation is still useful as an additional recommendation
+      const apiCheck = checkApiVsSubscription(toolId, currentSpend, toolUseCase, usageFrequency)
+      if (apiCheck) candidates.push(apiCheck)
+    }
+
+    if (billingType === 'api') {
+      const compare = compareApiBillingToSubscription(toolId, seats, currentSpend, toolUseCase)
+      if (compare) candidates.push(compare)
+    }
+
+    // seats vs team size over/under-purchase checks (only meaningful for subscription-priced plans)
+    if (planConfig.pricePerSeat !== null) {
+      // If user has more seats than team size => wasted seats
+      if (seats > input.teamSize) {
+        const waste = seats - input.teamSize
+        const savings = Math.round(waste * (planConfig.pricePerSeat ?? 0))
+        if (savings > 10) {
+          candidates.push({
+            action: `Reduce to ${input.teamSize} seats`,
+            savings,
+            reason: `You have ${waste} unused seat${waste > 1 ? 's' : ''}. Reducing to ${input.teamSize} seats saves $${savings}/mo.`,
+          })
+        }
+      }
+
+      // If team is larger than seats and current plan is individual-only, flag upgrade
+      if (seats < input.teamSize && planConfig.maxSeats === 1) {
+        candidates.push({
+          action: `Upgrade to a team plan or add seats`,
+          savings: 0,
+          reason: `You have ${input.teamSize} people but only ${seats} individual license${seats > 1 ? 's' : ''}. Consider upgrading to a team plan or adding seats.`,
+        })
+      }
+    }
 
     const best = candidates.sort((a, b) => b.savings - a.savings)[0]
 
