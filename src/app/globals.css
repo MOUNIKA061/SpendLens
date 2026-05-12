@@ -128,3 +128,27 @@
     @apply font-sans scroll-smooth;
   }
 }
+
+/*
+  Low-GPU mode reduces costly visual effects that can trigger
+  compositor instability on weaker or overloaded graphics hardware.
+*/
+.low-gpu {
+  scroll-behavior: auto !important;
+}
+
+.low-gpu *,
+.low-gpu *::before,
+.low-gpu *::after {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.low-gpu [class*='backdrop-blur'],
+.low-gpu [class*='blur-'] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}

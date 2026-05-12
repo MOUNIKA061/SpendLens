@@ -19,6 +19,10 @@ export type ToolInput = {
   billingType: BillingType
   useCase: UseCase
   usageFrequency: UsageFrequency
+  activeUsers?: number
+  utilizationPercent?: number
+  avgSessionsPerWeek?: number
+  monthlyPromptVolume?: number
 }
 
 export type AuditInput = {
@@ -27,6 +31,10 @@ export type AuditInput = {
   useCase: UseCase
 }
 
+export type RecommendationConfidence = 'high' | 'medium' | 'low'
+
+export type RecommendationPriority = 'critical' | 'high' | 'medium' | 'low'
+
 export type ToolAuditResult = {
   toolId: string
   toolName: string
@@ -34,6 +42,12 @@ export type ToolAuditResult = {
   recommendedAction: string
   monthlySavings: number
   reason: string
+  compatibilityScore?: number
+  switchingCost?: number
+  netAnnualSavings?: number
+  confidence?: RecommendationConfidence
+  priority?: RecommendationPriority
+  riskLevel?: 'low' | 'medium' | 'high'
 }
 
 export type FullAudit = {
@@ -54,6 +68,18 @@ export type SpendFormDraft = {
   useCase: UseCase
 }
 
+export type ToolCapabilities = {
+  codingDepth: number
+  autocompleteQuality: number
+  longContextSupport: number
+  enterpriseFeatures: number
+  agentEditing: number
+  workflowAutomation: number
+  dataAnalysisStrength: number
+}
+
+export type OnboardingFriction = 'low' | 'medium' | 'high'
+
 export type ToolPlanConfig = {
   label: string
   pricePerSeat: number | null
@@ -63,4 +89,8 @@ export type ToolPlanConfig = {
 export type ToolDefinition = {
   name: string
   plans: Record<string, ToolPlanConfig>
+  capabilities?: ToolCapabilities
+  pricingSourceUrl?: string
+  pricingVerifiedAt?: string
+  onboardingFriction?: OnboardingFriction
 }

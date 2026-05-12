@@ -7,7 +7,19 @@ export const TOOLS = {
       hobby:    { label: 'Hobby',    pricePerSeat: 0,  maxSeats: 1 },
       pro:      { label: 'Pro',      pricePerSeat: 20, maxSeats: 1 },
       business: { label: 'Business', pricePerSeat: 40, maxSeats: null },
-    }
+    },
+    capabilities: {
+      codingDepth: 9,
+      autocompleteQuality: 9,
+      longContextSupport: 8,
+      enterpriseFeatures: 7,
+      agentEditing: 9,
+      workflowAutomation: 7,
+      dataAnalysisStrength: 5,
+    },
+    pricingSourceUrl: 'https://cursor.com/pricing',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'low',
   },
   github_copilot: {
     name: 'GitHub Copilot',
@@ -15,7 +27,19 @@ export const TOOLS = {
       individual:  { label: 'Individual',  pricePerSeat: 10,  maxSeats: 1 },
       business:    { label: 'Business',    pricePerSeat: 19,  maxSeats: null },
       enterprise:  { label: 'Enterprise',  pricePerSeat: 39,  maxSeats: null },
-    }
+    },
+    capabilities: {
+      codingDepth: 8,
+      autocompleteQuality: 8,
+      longContextSupport: 5,
+      enterpriseFeatures: 8,
+      agentEditing: 4,
+      workflowAutomation: 4,
+      dataAnalysisStrength: 3,
+    },
+    pricingSourceUrl: 'https://github.com/features/copilot#pricing',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'low',
   },
   claude: {
     name: 'Claude',
@@ -25,7 +49,19 @@ export const TOOLS = {
       max:        { label: 'Max',        pricePerSeat: 100, maxSeats: 1 },
       team:       { label: 'Team',       pricePerSeat: 30,  maxSeats: null },
       enterprise: { label: 'Enterprise', pricePerSeat: null, maxSeats: null },
-    }
+    },
+    capabilities: {
+      codingDepth: 8,
+      autocompleteQuality: 6,
+      longContextSupport: 10,
+      enterpriseFeatures: 9,
+      agentEditing: 5,
+      workflowAutomation: 8,
+      dataAnalysisStrength: 8,
+    },
+    pricingSourceUrl: 'https://claude.ai/pricing',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'medium',
   },
   chatgpt: {
     name: 'ChatGPT',
@@ -33,19 +69,55 @@ export const TOOLS = {
       plus:       { label: 'Plus',       pricePerSeat: 20,  maxSeats: 1 },
       team:       { label: 'Team',       pricePerSeat: 30,  maxSeats: null },
       enterprise: { label: 'Enterprise', pricePerSeat: null, maxSeats: null },
-    }
+    },
+    capabilities: {
+      codingDepth: 7,
+      autocompleteQuality: 5,
+      longContextSupport: 7,
+      enterpriseFeatures: 8,
+      agentEditing: 3,
+      workflowAutomation: 7,
+      dataAnalysisStrength: 9,
+    },
+    pricingSourceUrl: 'https://openai.com/pricing',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'low',
   },
   anthropic_api: {
     name: 'Anthropic API',
     plans: {
       usage: { label: 'Usage-based', pricePerSeat: null, maxSeats: null }
-    }
+    },
+    capabilities: {
+      codingDepth: 8,
+      autocompleteQuality: 4,
+      longContextSupport: 10,
+      enterpriseFeatures: 7,
+      agentEditing: 4,
+      workflowAutomation: 8,
+      dataAnalysisStrength: 8,
+    },
+    pricingSourceUrl: 'https://www.anthropic.com/pricing/claude',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'high',
   },
   openai_api: {
     name: 'OpenAI API',
     plans: {
       usage: { label: 'Usage-based', pricePerSeat: null, maxSeats: null }
-    }
+    },
+    capabilities: {
+      codingDepth: 7,
+      autocompleteQuality: 4,
+      longContextSupport: 7,
+      enterpriseFeatures: 6,
+      agentEditing: 2,
+      workflowAutomation: 7,
+      dataAnalysisStrength: 9,
+    },
+    pricingSourceUrl: 'https://openai.com/pricing/gpt-4-api',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'high',
   },
   gemini: {
     name: 'Gemini',
@@ -53,7 +125,19 @@ export const TOOLS = {
       pro:   { label: 'Pro',   pricePerSeat: 20,  maxSeats: 1 },
       ultra: { label: 'Ultra', pricePerSeat: null, maxSeats: null },
       api:   { label: 'API',   pricePerSeat: null, maxSeats: null },
-    }
+    },
+    capabilities: {
+      codingDepth: 7,
+      autocompleteQuality: 6,
+      longContextSupport: 8,
+      enterpriseFeatures: 7,
+      agentEditing: 3,
+      workflowAutomation: 6,
+      dataAnalysisStrength: 8,
+    },
+    pricingSourceUrl: 'https://gemini.google.com/pricing',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'low',
   },
   windsurf: {
     name: 'Windsurf',
@@ -61,6 +145,18 @@ export const TOOLS = {
       free:  { label: 'Free',  pricePerSeat: 0,  maxSeats: 1 },
       pro:   { label: 'Pro',   pricePerSeat: 15, maxSeats: 1 },
       teams: { label: 'Teams', pricePerSeat: 35, maxSeats: null },
-    }
+    },
+    capabilities: {
+      codingDepth: 8,
+      autocompleteQuality: 8,
+      longContextSupport: 6,
+      enterpriseFeatures: 6,
+      agentEditing: 7,
+      workflowAutomation: 6,
+      dataAnalysisStrength: 4,
+    },
+    pricingSourceUrl: 'https://windsurf.ai/pricing',
+    pricingVerifiedAt: '2026-05-12',
+    onboardingFriction: 'low',
   },
 } as const satisfies Record<string, ToolDefinition>
