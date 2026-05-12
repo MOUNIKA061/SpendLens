@@ -19,7 +19,8 @@ function isAuditInput(value: unknown): value is AuditInput {
       tool &&
       typeof tool.toolId === 'string' &&
       typeof tool.plan === 'string' &&
-      typeof tool.seats === 'number' &&
+      // seats is optional for API billing
+      (tool.seats === undefined || typeof tool.seats === 'number') &&
       typeof tool.monthlySpend === 'number'
     )
   })
@@ -37,6 +38,10 @@ export async function POST(request: NextRequest) {
     const results = auditTools(input)
     const totalMonthlySavings = results.reduce((sum, r) => sum + r.monthlySavings, 0)
     const totalAnnualSavings = totalMonthlySavings * 12
+    
+    // Calculate total current spend for relative savings
+    const totalCurrentSpend = input.tools.reduce((sum, t) => sum + t.monthlySpend, 0)
+    const totalSavingsPercent = totalCurrentSpend > 0 ? (totalMonthlySavings / totalCurrentSpend) * 100 : 0
 
     const id = generateId()
 
@@ -46,6 +51,7 @@ export async function POST(request: NextRequest) {
       results,
       totalMonthlySavings,
       totalAnnualSavings,
+      totalSavingsPercent,
       summary: '',
       createdAt: new Date().toISOString(),
     }

@@ -1,5 +1,5 @@
 import { TOOLS } from './pricingData'
-import { AuditInput, ToolAuditResult, UseCase, OnboardingFriction, ToolCapabilities, RecommendationConfidence, RecommendationPriority } from '@/types'
+import { AuditInput, ToolAuditResult, UseCase, OnboardingFriction, ToolCapabilities, RecommendationConfidence, RecommendationPriority, BillingType } from '@/types'
 
 type ToolId = keyof typeof TOOLS
 type PlanConfig = { label: string; pricePerSeat: number | null; maxSeats: number | null }
@@ -10,6 +10,21 @@ const CAPABILITY_COMPATIBILITY_THRESHOLD = 0.75
 const MIN_SWITCHING_ROI_THRESHOLD = 50
 const HOURLY_RATE_DEFAULT = 100
 const ONBOARDING_HOURS = { low: 2, medium: 6, high: 12 }
+
+/**
+ * Dynamic capability weighting per use case.
+ * Different use cases prioritize different capabilities.
+ * Example: coding prioritizes agentEditing, research prioritizes longContext.
+ */
+const CAPABILITY_WEIGHTS_BY_USE_CASE: Record<UseCase, Record<keyof ToolCapabilities, number>> = {
+  coding: { codingDepth: 0.25, autocompleteQuality: 0.2, agentEditing: 0.25, longContextSupport: 0.1, enterpriseFeatures: 0.08, workflowAutomation: 0.07, dataAnalysisStrength: 0.05 },
+  writing: { workflowAutomation: 0.2, longContextSupport: 0.25, autocompleteQuality: 0.15, codingDepth: 0.05, agentEditing: 0.08, enterpriseFeatures: 0.12, dataAnalysisStrength: 0.15 },
+  research: { longContextSupport: 0.3, dataAnalysisStrength: 0.25, workflowAutomation: 0.15, enterpriseFeatures: 0.1, codingDepth: 0.05, autocompleteQuality: 0.05, agentEditing: 0.1 },
+  data: { dataAnalysisStrength: 0.35, longContextSupport: 0.25, codingDepth: 0.15, workflowAutomation: 0.15, enterpriseFeatures: 0.05, autocompleteQuality: 0.03, agentEditing: 0.02 },
+  customer_support: { workflowAutomation: 0.25, longContextSupport: 0.2, codingDepth: 0.05, autocompleteQuality: 0.05, dataAnalysisStrength: 0.1, enterpriseFeatures: 0.2, agentEditing: 0.15 },
+  automation: { codingDepth: 0.2, agentEditing: 0.2, workflowAutomation: 0.3, dataAnalysisStrength: 0.1, longContextSupport: 0.1, enterpriseFeatures: 0.08, autocompleteQuality: 0.02 },
+  mixed: { codingDepth: 0.15, autocompleteQuality: 0.12, longContextSupport: 0.15, enterpriseFeatures: 0.1, agentEditing: 0.15, workflowAutomation: 0.15, dataAnalysisStrength: 0.18 },
+}
 
 const USE_CASE_ALTERNATIVES: Record<UseCase, { toolId: ToolId; planKey: string; reason: string }[]> = {
   coding: [
@@ -63,16 +78,18 @@ function getPlanCost(toolId: ToolId, planKey: string, seats: number): number | n
   return plan.pricePerSeat * seats
 }
 
-function calculateCapabilityScore(currentToolCaps: ToolCapabilities | undefined, altToolCaps: ToolCapabilities | undefined): number {
+function calculateCapabilityScore(currentToolCaps: ToolCapabilities | undefined, altToolCaps: ToolCapabilities | undefined, useCase: UseCase): number {
   if (!currentToolCaps || !altToolCaps) return 0.5
   
-  const weights = { codingDepth: 0.2, autocompleteQuality: 0.15, longContextSupport: 0.15, enterpriseFeatures: 0.1, agentEditing: 0.15, workflowAutomation: 0.15, dataAnalysisStrength: 0.1 }
+  // Use dynamic weights based on the specific use case
+  const weights = CAPABILITY_WEIGHTS_BY_USE_CASE[useCase] || CAPABILITY_WEIGHTS_BY_USE_CASE['mixed']
   let totalScore = 0
   
   for (const [cap, weight] of Object.entries(weights)) {
     const current = currentToolCaps[cap as keyof ToolCapabilities] || 5
     const alt = altToolCaps[cap as keyof ToolCapabilities] || 5
-    const capScore = Math.min(alt / Math.max(current, 1), 1)
+    // For critical capabilities, shortfalls are more severe (punish inadequate scores)
+    const capScore = weight > 0.2 ? Math.pow(Math.min(alt / Math.max(current, 1), 1), 1.2) : Math.min(alt / Math.max(current, 1), 1)
     totalScore += capScore * weight
   }
   
@@ -92,6 +109,28 @@ function validatePricingFreshness(verifiedAt: string | undefined): { isStale: bo
   return { isStale: daysSince > 30, daysSince }
 }
 
+/**
+ * Validates that the billing type is used with appropriate seat counts.
+ * - 'subscription' and 'hybrid': seats should reflect actual users
+ * - 'api': seats should be 1 (usage-based, not seat-based)
+ * Returns { valid, message? }
+ */
+function validateBillingTypeSeats(billingType: BillingType, seats: number): { valid: boolean; message?: string } {
+  if (billingType === 'api' && seats !== 1) {
+    return { 
+      valid: false, 
+      message: `API billing should have seats=1 (usage-based). You provided seats=${seats}. API recommendations will not use seat-based logic.` 
+    }
+  }
+  if ((billingType === 'subscription' || billingType === 'hybrid') && seats < 1) {
+    return { 
+      valid: false, 
+      message: `Subscription/Hybrid billing requires seats≥1. You provided seats=${seats}.` 
+    }
+  }
+  return { valid: true }
+}
+
 function detectUnderutilization(seats: number, activeUsers: number | undefined, utilizationPercent: number | undefined): { isUnderutilized: boolean; reason?: string; waste?: number } {
   if (activeUsers !== undefined && activeUsers < seats * 0.5) {
     return { isUnderutilized: true, reason: `Only ${activeUsers} of ${seats} seats actively used (${Math.round((activeUsers / seats) * 100)}% utilization)`, waste: seats - activeUsers }
@@ -109,7 +148,11 @@ function calculateRecommendationScore(candidate: Candidate): number {
   return savingsScore + confidenceScore + riskScore
 }
 
-function checkRightSize(toolId: ToolId, currentPlanKey: string, seats: number, currentSpend: number): Candidate | null {
+function checkRightSize(toolId: ToolId, currentPlanKey: string, seats: number, currentSpend: number, billingType: BillingType): Candidate | null {
+  // Right-sizing only applies to subscription-based billing (seats have meaning)
+  // API billing is usage-based with no seat concept; compareApiBillingToSubscription handles that case
+  if (billingType === 'api') return null
+
   const toolDef = TOOLS[toolId]
   const plans = toolDef.plans as Record<string, PlanConfig>
   let bestSavings = 0
@@ -141,7 +184,11 @@ function checkRightSize(toolId: ToolId, currentPlanKey: string, seats: number, c
   }
 }
 
-function checkCrossToolAlternative(toolId: ToolId, seats: number, currentSpend: number, useCase: UseCase): Candidate | null {
+function checkCrossToolAlternative(toolId: ToolId, seats: number, currentSpend: number, useCase: UseCase, billingType: BillingType): Candidate | null {
+  // Cross-tool switching for seat-based subscription alternatives only
+  // API billing (usage-based) is handled separately by compareApiBillingToSubscription
+  if (billingType === 'api') return null
+
   const currentTool = TOOLS[toolId]
   const currentCaps = currentTool.capabilities
   const alternatives = USE_CASE_ALTERNATIVES[useCase] ?? []
@@ -154,7 +201,8 @@ function checkCrossToolAlternative(toolId: ToolId, seats: number, currentSpend: 
     if (altCost === null) continue
     const savings = currentSpend - altCost
     const altTool = TOOLS[alt.toolId]
-    const compatScore = calculateCapabilityScore(currentCaps, altTool.capabilities)
+    // Use dynamic capability weighting based on use case for accurate compatibility scoring
+    const compatScore = calculateCapabilityScore(currentCaps, altTool.capabilities, useCase)
     
     if (compatScore < CAPABILITY_COMPATIBILITY_THRESHOLD) continue
     if (savings > bestSavings) {
@@ -172,6 +220,8 @@ function checkCrossToolAlternative(toolId: ToolId, seats: number, currentSpend: 
 
   const switchingCost = estimateSwitchingCost(seats, altTool.onboardingFriction)
   const annualSavings = bestSavings * 12
+  // Net annual savings = (monthly savings × 12) - switching cost.
+  // Only recommend if net positive: ensures short-term onboarding pain is offset by long-term gain.
   const netAnnualSavings = annualSavings - switchingCost
   
   if (netAnnualSavings <= 0) return null
@@ -260,12 +310,18 @@ function checkApiVsSubscription(toolId: ToolId, currentSpend: number, useCase: U
   }
 }
 
-function compareApiBillingToSubscription(toolId: ToolId, seats: number, currentSpend: number, useCase: UseCase): Candidate | null {
+function compareApiBillingToSubscription(toolId: ToolId, currentSpend: number, useCase: UseCase): Candidate | null {
+  // API cost-benefit: Compare current API spend vs cheapest subscription alternative
+  // Note: For API tools, DO NOT use seat-based comparison.
+  // Instead, evaluate if subscription usage pattern would be more economical.
   const alternatives = USE_CASE_ALTERNATIVES[useCase] ?? []
   let cheapest: { toolId: ToolId; planKey: string; cost: number; label: string } | null = null
 
+  // For API comparison, assume 1 user (since API is pay-per-use, not per-seat)
+  const estimatedSeatsForUsage = 1
+  
   for (const alt of alternatives) {
-    const cost = getPlanCost(alt.toolId, alt.planKey, seats)
+    const cost = getPlanCost(alt.toolId, alt.planKey, estimatedSeatsForUsage)
     if (cost === null) continue
     if (!cheapest || cost < cheapest.cost) {
       const altTool = TOOLS[alt.toolId]
@@ -279,23 +335,24 @@ function compareApiBillingToSubscription(toolId: ToolId, seats: number, currentS
   if (!cheapest) return null
 
   const subscriptionCost = cheapest.cost
-  const savings = Math.round(subscriptionCost - currentSpend)
-
-  if (subscriptionCost + 10 < currentSpend) {
+  
+  // Significant savings threshold: subscription is at least 20% cheaper
+  if (subscriptionCost < currentSpend * 0.8) {
     return {
-      action: `Switch to ${TOOLS[cheapest.toolId].name} ${cheapest.label}`,
+      action: `Consider switching to ${TOOLS[cheapest.toolId].name} ${cheapest.label}`,
       savings: Math.round(currentSpend - subscriptionCost),
-      reason: `Your API spend is $${currentSpend}/mo. A ${TOOLS[cheapest.toolId].name} ${cheapest.label} subscription costs $${subscriptionCost}/mo for ${seats} seat${seats > 1 ? 's' : ''} — switching would save $${Math.round(currentSpend - subscriptionCost)}/mo.`,
+      reason: `Your API spend is $${currentSpend}/mo. A ${TOOLS[cheapest.toolId].name} ${cheapest.label} subscription costs $${subscriptionCost}/mo — if your usage patterns fit a flat subscription, switching would save $${Math.round(currentSpend - subscriptionCost)}/mo.`,
       confidence: 'high',
       priority: 'high',
       riskLevel: 'low',
     }
   }
-
+  
+  // API is cost-effective: don't force subscription unless significant savings
   return {
-    action: `Keep API (cost-effective)`,
+    action: `Keep API (cost-effective for your usage)`,
     savings: 0,
-    reason: `Your API spend is $${currentSpend}/mo which compares favorably to the cheapest subscription option at $${subscriptionCost}/mo for ${seats} seat${seats > 1 ? 's' : ''}.`,
+    reason: `Your API spend at $${currentSpend}/mo is cost-effective compared to the cheapest subscription at $${subscriptionCost}/mo. API model remains optimal for your ${useCase} workload.`,
     confidence: 'high',
     priority: 'low',
     riskLevel: 'low',
@@ -304,6 +361,7 @@ function compareApiBillingToSubscription(toolId: ToolId, seats: number, currentS
 
 export function auditTools(input: AuditInput): ToolAuditResult[] {
   const results: ToolAuditResult[] = []
+  let totalCurrentSpend = 0
 
   for (const tool of input.tools) {
     const toolId = tool.toolId as ToolId
@@ -315,55 +373,83 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
     if (!planConfig) continue
 
     const currentSpend = tool.monthlySpend
-    const seats = tool.seats
-    const billingType = (tool as any).billingType ?? 'subscription'
-    const toolUseCase = ((tool as any).useCase as UseCase) ?? input.useCase
-    const usageFrequency = (tool as any).usageFrequency ?? 'daily'
+    totalCurrentSpend += currentSpend
+    
+    const billingType: BillingType = tool.billingType ?? 'subscription'
+    
+    // Per-tool use case overrides global use case for capability matching
+    const toolUseCase = tool.useCase ?? input.useCase
+    const usageFrequency = tool.usageFrequency ?? 'daily'
+    
+    // Subscription/Hybrid: use seat-based metrics
+    const seats = tool.seats ?? 1
     const activeUsers = tool.activeUsers
     const utilizationPercent = tool.utilizationPercent
+    
+    // API/Hybrid: use usage-based metrics
+    const monthlyTokens = tool.monthlyTokens
+    const monthlyApiCalls = tool.monthlyApiCalls
 
     const candidates: Candidate[] = []
 
-    // Check pricing freshness
+    // Validate pricing freshness and surface warning if stale
     const freshness = validatePricingFreshness(toolConfig.pricingVerifiedAt)
-    if (freshness.isStale) {
-      // Still proceed, but will note staleness
+    let pricingWarning = freshness.isStale
+    if (pricingWarning) {
+      // Will surface warning in final recommendation reason
     }
 
-    // Detect underutilization - HIGHEST PRIORITY
-    const underutil = detectUnderutilization(seats, activeUsers, utilizationPercent)
-    if (underutil.isUnderutilized) {
-      const wastedSeats = underutil.waste ?? Math.round(seats * 0.5)
-      const wastedSpend = Math.round((wastedSeats / seats) * currentSpend)
-      candidates.push({
-        action: `Eliminate unused licenses (${wastedSeats} seats)`,
-        savings: wastedSpend,
-        reason: underutil.reason || `You have ${wastedSeats} unused seat${wastedSeats > 1 ? 's' : ''}. Reducing to active usage saves $${wastedSpend}/mo.`,
-        confidence: 'high',
-        priority: 'critical',
-        riskLevel: 'low',
-      })
+    // Validate billing type constraints
+    const validation = validateBillingTypeSeats(billingType, seats)
+
+    // UNDERUTILIZATION DETECTION - HIGHEST PRIORITY
+    // Unused seats are pure waste with zero risk (unlike vendor switches which carry adoption risk).
+    if ((billingType === 'subscription' || billingType === 'hybrid') && (activeUsers !== undefined || utilizationPercent !== undefined)) {
+      const underutil = detectUnderutilization(seats, activeUsers, utilizationPercent)
+      if (underutil.isUnderutilized) {
+        const wastedSeats = underutil.waste ?? Math.round(seats * 0.5)
+        const wastedSpend = Math.round((wastedSeats / seats) * currentSpend)
+        candidates.push({
+          action: `Eliminate unused licenses (${wastedSeats} seats)`,
+          savings: wastedSpend,
+          reason: underutil.reason || `You have ${wastedSeats} unused seat${wastedSeats > 1 ? 's' : ''}. Reducing to active usage saves $${wastedSpend}/mo.`,
+          confidence: 'high',
+          priority: 'critical',
+          riskLevel: 'low',
+        })
+      }
     }
 
-    // Check plan right-sizing
+    // BILLING TYPE-BASED RECOMMENDATION LOGIC
+    // Different billing models require different optimization strategies:
+    // - SUBSCRIPTION: Fixed cost per seat. Optimize via right-sizing, cross-tool switches, API investigation.
+    // - API: Usage-based, no seat concept. Optimize via cost-benefit vs subscription baseline.
+    // - HYBRID: Both models present. Evaluate both paths separately.
+
     if (billingType === 'subscription' || billingType === 'hybrid') {
-      const rightSize = checkRightSize(toolId, tool.plan, seats, currentSpend)
+      // Right-sizing: Switch to cheaper plan within same vendor (low risk, high confidence)
+      const rightSize = checkRightSize(toolId, tool.plan, seats, currentSpend, billingType)
       if (rightSize) candidates.push(rightSize)
 
-      const crossTool = checkCrossToolAlternative(toolId, seats, currentSpend, toolUseCase)
+      // Cross-tool alternative: Find cheaper equivalent tool with compatible capabilities
+      // Uses dynamic weighting based on use case for accurate compatibility
+      const crossTool = checkCrossToolAlternative(toolId, seats, currentSpend, toolUseCase, billingType)
       if (crossTool) candidates.push(crossTool)
 
+      // API investigation: For frequently-used tools, check if API model is more cost-effective
       const apiCheck = checkApiVsSubscription(toolId, currentSpend, toolUseCase, usageFrequency)
       if (apiCheck) candidates.push(apiCheck)
     }
 
-    if (billingType === 'api') {
-      const compare = compareApiBillingToSubscription(toolId, seats, currentSpend, toolUseCase)
+    if (billingType === 'api' || billingType === 'hybrid') {
+      // API cost-benefit: Compare current API spend vs cheapest subscription alternative
+      // Does NOT use seat count for API comparisons (API is usage-based, not per-seat)
+      const compare = compareApiBillingToSubscription(toolId, currentSpend, toolUseCase)
       if (compare) candidates.push(compare)
     }
 
-    // Seat waste checks
-    if (planConfig.pricePerSeat !== null) {
+    // SEAT WASTE CHECKS - Only applies to subscription/hybrid with per-seat pricing
+    if ((billingType === 'subscription' || billingType === 'hybrid') && planConfig.pricePerSeat !== null) {
       if (seats > input.teamSize) {
         const waste = seats - input.teamSize
         const savings = Math.round(waste * (planConfig.pricePerSeat ?? 0))
@@ -391,11 +477,12 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
       }
     }
 
-    // Sort by calculated score (takes into account priority, confidence, risk, savings)
+    // Sort by calculated score (prioritizes: critical priority, high confidence, high savings, relative savings)
     candidates.sort((a, b) => calculateRecommendationScore(b) - calculateRecommendationScore(a))
 
     let recommendedAction = 'No change needed'
     let monthlySavings = 0
+    let savingsPercent: number | undefined
     let reason = `Your current ${toolConfig.name} ${planConfig.label} plan appears well-matched to your usage.`
     let confidence: RecommendationConfidence = 'high'
     let priority: RecommendationPriority = 'low'
@@ -408,6 +495,7 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
     if (best) {
       recommendedAction = best.action
       monthlySavings = best.savings
+      savingsPercent = currentSpend > 0 ? (best.savings / currentSpend) * 100 : 0
       reason = best.reason
       confidence = best.confidence
       priority = best.priority
@@ -417,14 +505,21 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
       netAnnualSavings = best.netAnnualSavings
     }
 
+    // Credits opportunity: If no better recommendation found, suggest credit purchasing for bulk discounts
     const creditsNote = checkCreditsOpportunity(toolConfig.name, currentSpend)
     if (creditsNote && !best) {
       recommendedAction = creditsNote.action
       monthlySavings = creditsNote.savings
+      savingsPercent = currentSpend > 0 ? (creditsNote.savings / currentSpend) * 100 : 0
       reason = creditsNote.reason
       confidence = creditsNote.confidence
       priority = creditsNote.priority
       riskLevel = creditsNote.riskLevel
+    }
+
+    // Surface stale pricing warning if applicable
+    if (pricingWarning && !reason.includes('pricing data')) {
+      reason += ` [Pricing data from ${freshness.daysSince} days ago — may have changed.]`
     }
 
     results.push({
@@ -433,7 +528,9 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
       currentSpend,
       recommendedAction,
       monthlySavings,
+      savingsPercent,
       reason,
+      pricingWarning,
       compatibilityScore,
       switchingCost,
       netAnnualSavings,
@@ -443,10 +540,16 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
     })
   }
 
-  return results.sort((a, b) => {
+  // Calculate relative savings for total audit
+  const finalResults = results.sort((a, b) => {
     const priorityOrder: Record<RecommendationPriority, number> = { critical: 0, high: 1, medium: 2, low: 3 }
     const priorityDiff = priorityOrder[a.priority || 'low'] - priorityOrder[b.priority || 'low']
     if (priorityDiff !== 0) return priorityDiff
-    return (b.monthlySavings || 0) - (a.monthlySavings || 0)
+    return (b.savingsPercent || 0) - (a.savingsPercent || 0)
   })
+
+  // Store total spend for percentage calculations in caller
+  ;(finalResults as any)._totalCurrentSpend = totalCurrentSpend
+
+  return finalResults
 }

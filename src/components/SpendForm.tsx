@@ -6,15 +6,15 @@ import { CheckCircle2, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 import { TOOLS } from '@/lib/pricingData'
 import { clearDraft, getDraft, saveAudit, saveDraft } from '@/lib/storage'
-import { AuditInput, SpendFormDraft, ToolInput, UseCase } from '@/types'
+import { AuditInput, SpendFormDraft, ToolInput, UseCase, PrimaryUseCase } from '@/types'
 
 const TOOL_IDS = Object.keys(TOOLS) as Array<keyof typeof TOOLS>
-const USE_CASES: UseCase[] = ['coding', 'writing', 'data', 'research', 'mixed']
+// Global use case options: only PrimaryUseCase for team-level fallback
+const USE_CASES: PrimaryUseCase[] = ['coding', 'writing', 'data', 'research', 'mixed']
 const DEFAULT_PLAN_ORDER = ['hobby', 'individual', 'free', 'pro', 'plus', 'team', 'business', 'enterprise', 'max', 'teams', 'usage', 'api', 'ultra']
 
-type BillingType = 'subscription' | 'api-usage' | 'hybrid'
+type BillingType = 'subscription' | 'api' | 'hybrid'
 type UsageFrequency = 'daily' | 'weekly' | 'occasionally'
-type UsageFocus = UseCase | 'customer-support' | 'automation'
 
 type RichToolEntry = {
   id: string
@@ -23,7 +23,7 @@ type RichToolEntry = {
   monthlySpend: number
   seats: number
   billingType: BillingType
-  useCases: UsageFocus[]
+  useCases: UseCase[]
   usageFrequency: UsageFrequency
   notes: string
 }
@@ -115,7 +115,7 @@ const TOOL_CONFIG = {
 
 const BILLING_TYPES: Array<{ id: BillingType; label: string; description: string }> = [
   { id: 'subscription', label: 'Subscription', description: 'Fixed recurring seats' },
-  { id: 'api-usage', label: 'API Usage', description: 'Usage-based billing' },
+  { id: 'api', label: 'API Usage', description: 'Usage-based billing' },
   { id: 'hybrid', label: 'Hybrid', description: 'Mix of seats and API usage' },
 ]
 
@@ -125,12 +125,12 @@ const USAGE_FREQUENCIES: Array<{ id: UsageFrequency; label: string }> = [
   { id: 'occasionally', label: 'Occasionally' },
 ]
 
-const TOOL_USE_CASES: Array<{ id: UsageFocus; label: string }> = [
+const TOOL_USE_CASES: Array<{ id: UseCase; label: string }> = [
   { id: 'coding', label: 'Coding' },
   { id: 'writing', label: 'Writing' },
   { id: 'research', label: 'Research' },
   { id: 'data', label: 'Data Analysis' },
-  { id: 'customer-support', label: 'Customer Support' },
+  { id: 'customer_support', label: 'Customer Support' },
   { id: 'automation', label: 'Automation' },
   { id: 'mixed', label: 'Mixed' },
 ]
@@ -168,10 +168,10 @@ function normalizeRichToolEntry(entry: Partial<RichToolEntry> & { id?: string })
     planId: planExists ? (entry.planId as string) : defaultPlan.id,
     monthlySpend: Number(entry.monthlySpend ?? 0),
     seats: Math.max(1, Number(entry.seats ?? 1)),
-    billingType: (['subscription', 'api-usage', 'hybrid'] as const).includes(entry.billingType as BillingType)
+    billingType: (['subscription', 'api', 'hybrid'] as const).includes(entry.billingType as BillingType)
       ? (entry.billingType as BillingType)
       : 'subscription',
-    useCases: Array.isArray(entry.useCases) && entry.useCases.length > 0 ? Array.from(new Set(entry.useCases)) as UsageFocus[] : ['mixed'],
+    useCases: Array.isArray(entry.useCases) && entry.useCases.length > 0 ? Array.from(new Set(entry.useCases)) as UseCase[] : ['mixed'],
     usageFrequency: entry.usageFrequency === 'weekly' || entry.usageFrequency === 'occasionally' ? entry.usageFrequency : 'daily',
     notes: typeof entry.notes === 'string' ? entry.notes : '',
   }
@@ -181,21 +181,31 @@ function richToolEntryToAuditTool(entry: RichToolEntry): ToolInput {
   const provider = TOOL_CONFIG[entry.providerId]
   const plan = provider.plans.find(option => option.id === entry.planId) ?? getDefaultProviderPlan(entry.providerId)
 
-  // Map form's billing type to types.ts BillingType ('api-usage' -> 'api')
-  const billingType: any = entry.billingType === 'api-usage' ? 'api' : entry.billingType
-
   // Per-tool use case: pick the first selected use case, fall back to 'mixed'
+  // Note: Per-tool use case overrides global use case in audit logic
   const useCase: UseCase = (entry.useCases[0] ?? 'mixed') as UseCase
 
-  return {
+  // For billing type:
+  // - Subscription: requires seats (per-seat model)
+  // - API: seats not used (usage-based model)
+  // - Hybrid: may have both
+  const seats = entry.billingType === 'api' ? undefined : Math.max(1, entry.seats)
+
+  const toolInput: ToolInput = {
     toolId: provider.toolId,
     plan: plan.auditPlan,
-    seats: entry.seats,
     monthlySpend: entry.monthlySpend,
-    billingType,
+    billingType: entry.billingType,
     useCase,
     usageFrequency: entry.usageFrequency,
   }
+
+  // Add seats only for subscription/hybrid (API doesn't use seats)
+  if (seats !== undefined) {
+    toolInput.seats = seats
+  }
+
+  return toolInput
 }
 
 function formatMoney(value: number): string {
@@ -222,7 +232,7 @@ function createTool(toolId: keyof typeof TOOLS): ToolInput {
   return {
     toolId,
     plan,
-    seats: 1,
+    seats: 1,  // Default for subscription/hybrid; optional for API
     monthlySpend: planConfig[plan]?.pricePerSeat ?? 0,
     billingType: 'subscription',
     useCase: 'mixed',
@@ -258,7 +268,7 @@ function normalizeDraft(draft: unknown) {
           : ('Other' as (typeof INDUSTRIES)[number]),
       estimatedMonthlyBudget: Number(candidate.estimatedMonthlyBudget || 0),
       teamSize: Math.max(1, Number(candidate.teamSize || 5)),
-      useCase: USE_CASES.includes(candidate.useCase as UseCase) ? (candidate.useCase as UseCase) : 'mixed',
+      useCase: USE_CASES.includes(candidate.useCase as PrimaryUseCase) ? (candidate.useCase as PrimaryUseCase) : 'mixed',
       toolEntries: rawToolEntries.map(entry => normalizeRichToolEntry(entry as Partial<RichToolEntry> & { id?: string })),
     }
   }
@@ -301,7 +311,7 @@ function normalizeDraft(draft: unknown) {
     industry: 'Other' as (typeof INDUSTRIES)[number],
     estimatedMonthlyBudget: 0,
     teamSize: Math.max(1, Number(candidate.teamSize || 5)),
-    useCase: USE_CASES.includes(candidate.useCase as UseCase) ? (candidate.useCase as UseCase) : 'mixed',
+    useCase: USE_CASES.includes(candidate.useCase as PrimaryUseCase) ? (candidate.useCase as PrimaryUseCase) : 'mixed',
     toolEntries: toolEntries.length > 0 ? toolEntries : [fallbackEntry],
   }
 }
@@ -444,7 +454,7 @@ export function SpendForm() {
       const input: AuditInput = {
         tools,
         teamSize,
-        useCase,
+        useCase: useCase as PrimaryUseCase,
       }
 
       const response = await fetch('/api/audit', {
