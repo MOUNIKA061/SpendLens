@@ -18,6 +18,7 @@ import { FullAudit } from '@/types'
 
 import { LeadCapture } from './LeadCapture'
 import { ShareButton } from './ShareButton'
+import { Mail } from 'lucide-react'
 
 function formatMoney(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -30,10 +31,56 @@ function formatMoney(value: number): string {
 export function AuditResults({ auditId }: { auditId: string }) {
   const [audit, setAudit] = useState<FullAudit | null>(null)
   const [isReady, setIsReady] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
-    setAudit(getAudit(auditId))
-    setIsReady(true)
+    let cancelled = false
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+    const tryLoad = async (attempt = 0) => {
+      try {
+        const res = await fetch(`/api/audits/${auditId}`)
+        if (res.ok) {
+          const json = (await res.json()) as FullAudit
+          if (!cancelled) {
+            setAudit(json)
+            setIsReady(true)
+          }
+          return
+        }
+      } catch (error) {
+        console.error('fetch audit', error)
+      }
+
+      const cached = getAudit(auditId)
+      if (cached) {
+        if (!cancelled) {
+          setAudit(cached)
+          setIsReady(true)
+        }
+        return
+      }
+
+      if (attempt < 4) {
+        if (!cancelled) setRetryCount(attempt + 1)
+        timeoutId = setTimeout(() => {
+          void tryLoad(attempt + 1)
+        }, 500)
+        return
+      }
+
+      if (!cancelled) {
+        setAudit(null)
+        setIsReady(true)
+      }
+    }
+
+    void tryLoad()
+
+    return () => {
+      cancelled = true
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [auditId])
 
   const totalSpend = useMemo(() => {
@@ -50,6 +97,7 @@ export function AuditResults({ auditId }: { auditId: string }) {
             <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5" />
             <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5" />
           </div>
+          <p className="text-sm text-slate-400">Loading audit results… {retryCount > 0 ? `retry ${retryCount}` : ''}</p>
         </div>
       </div>
     )
@@ -81,10 +129,11 @@ export function AuditResults({ auditId }: { auditId: string }) {
 
   const savingsColor = audit.totalMonthlySavings > 0 ? 'text-emerald-300' : 'text-white'
   const positiveResults = audit.results.filter(result => result.monthlySavings > 0)
+  const lowSavings = audit.totalMonthlySavings < 100 || positiveResults.length === 0
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.22),_transparent_38%),linear-gradient(180deg,#050816_0%,#04060f_100%)] text-slate-100">
-      <LeadCapture />
+      <LeadCapture auditId={auditId} source="credex" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-8 lg:px-8 lg:py-10">
         <div className="flex items-center justify-between gap-4">
           <Link
@@ -149,11 +198,55 @@ export function AuditResults({ auditId }: { auditId: string }) {
             <p className="mt-3 text-sm uppercase tracking-[0.2em] text-emerald-100/70">saved per month</p>
             {audit.totalMonthlySavings > 500 ? (
               <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-sm leading-6 text-emerald-50">
-                Credex can help you save even more.
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="font-semibold">Credex can help you capture more of these savings.</div>
+                    <div className="mt-1 text-sm text-emerald-50/80">We can help operationalize and capture additional vendor discounts and switching ROI.</div>
+                  </div>
+                  <a
+                    href={`mailto:sales@spendlens.com?subject=Credex%20savings%20help%20for%20audit%20${auditId}`}
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-900/30 px-3 py-2 text-sm font-semibold text-emerald-50 shadow-md hover:bg-emerald-900/40"
+                  >
+                    <Mail className="h-4 w-4" /> Get Credex help
+                  </a>
+                </div>
               </div>
-            ) : audit.totalMonthlySavings < 100 ? (
+            ) : lowSavings ? (
               <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-200">
-                You&apos;re in good shape. The stack is already close to optimized.
+                <div className="font-semibold">You’re spending efficiently.</div>
+                <div className="mt-1">Your current AI stack already appears well optimized. We won’t manufacture savings.</div>
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    id="notify-email"
+                    className="rounded-lg border border-white/10 bg-white/5 p-2 text-white placeholder:text-slate-500"
+                  />
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById('notify-email') as HTMLInputElement | null
+                      const email = el?.value ?? ''
+                      if (!email) return
+
+                      void fetch('/api/leads', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          email,
+                          auditId,
+                          source: 'low-savings',
+                          honeypot: '',
+                        }),
+                      }).finally(() => {
+                        el && (el.value = '')
+                        alert('Thanks — we will notify you when new optimizations are available.')
+                      })
+                    }}
+                    className="rounded-md bg-emerald-400 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
+                  >
+                    Notify me
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-200">
@@ -187,14 +280,21 @@ export function AuditResults({ auditId }: { auditId: string }) {
                         </p>
                         <h2 className="mt-1 text-2xl font-semibold text-white">{result.recommendedAction}</h2>
                       </div>
-                      <div
-                        className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                          hasSavings
-                            ? 'bg-emerald-400/15 text-emerald-200'
-                            : 'bg-white/5 text-slate-300'
-                        }`}
-                      >
-                        {hasSavings ? `${formatMoney(result.monthlySavings)} saved` : 'No savings'}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                            hasSavings
+                              ? 'bg-emerald-400/15 text-emerald-200'
+                              : 'bg-white/5 text-slate-300'
+                          }`}
+                        >
+                          {hasSavings ? `${formatMoney(result.monthlySavings)} saved` : 'No savings'}
+                        </div>
+                        {result.pricingWarning ? (
+                          <div className="rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-200">Pricing may be stale</div>
+                        ) : null}
+                        <div className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-300">{result.confidence}</div>
+                        <div className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-300">{result.riskLevel}</div>
                       </div>
                     </div>
 

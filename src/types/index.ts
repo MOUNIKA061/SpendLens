@@ -101,6 +101,16 @@ export type SpendFormDraft = {
   useCase: UseCase
 }
 
+export type LeadSubmission = {
+  email: string
+  companyName?: string
+  role?: string
+  teamSize?: number
+  auditId: string
+  source?: 'low-savings' | 'credex' | 'waitlist'
+  honeypot?: string
+}
+
 export type ToolCapabilities = {
   codingDepth: number
   autocompleteQuality: number

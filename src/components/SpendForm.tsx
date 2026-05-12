@@ -473,7 +473,25 @@ export function SpendForm() {
       const audit = await response.json()
       saveAudit(audit)
       clearDraft()
-      router.push(`/results/${audit.id}?saved=${audit.totalMonthlySavings}`)
+
+      try {
+        const persistResponse = await fetch('/api/audits', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(audit),
+        })
+
+        if (!persistResponse.ok) {
+          throw new Error('Failed to persist audit')
+        }
+      } catch (persistError) {
+        console.error('Background audit persistence failed:', persistError)
+        window.alert('Your audit was created, but permanent sharing may take a moment to sync.')
+      }
+
+      router.push(`/results/${audit.id}`)
     } catch (error) {
       console.error('Error creating audit:', error)
       window.alert('Failed to create audit. Please try again.')

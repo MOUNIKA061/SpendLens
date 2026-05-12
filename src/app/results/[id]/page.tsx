@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { AuditResults } from '@/components/AuditResults'
+import { getAuditRecord } from '@/lib/server/persistence'
 
 type ResultsPageProps = {
   params: Promise<{ id: string }>
@@ -13,19 +14,50 @@ function getSavedAmount(searchParams?: { saved?: string }): number {
   return Number.isFinite(parsedValue) ? parsedValue : 0
 }
 
-export async function generateMetadata({ params, searchParams }: ResultsPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ResultsPageProps): Promise<Metadata> {
   const { id } = await params
-  const resolvedSearchParams = searchParams ? await searchParams : undefined
-  const savedAmount = getSavedAmount(resolvedSearchParams)
-  const shareUrl = `/results/${id}${savedAmount > 0 ? `?saved=${savedAmount}` : ''}`
+  try {
+    const audit = await getAuditRecord(id)
+    if (audit) {
+      const monthly = Number(audit.totalMonthlySavings) || 0
+      const annual = Number(audit.totalAnnualSavings) || 0
+      const shareUrl = `/results/${id}`
+      return {
+        title: `Saved $${monthly}/month on AI tools`,
+        description: `SpendLens found ${annual}/year in AI savings`,
+        openGraph: {
+          title: `Saved $${monthly}/month on AI tools`,
+          description: `SpendLens found ${annual}/year in AI savings`,
+          url: shareUrl,
+          images: [`/api/og/${id}`],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: `Saved $${monthly}/month on AI tools`,
+          description: `SpendLens found ${annual}/year in AI savings`,
+          images: [`/api/og/${id}`],
+        },
+      }
+    }
+  } catch (err) {
+    // ignore and fall back
+    console.error('metadata audit read failed', err)
+  }
 
   return {
-    title: `I could save $${savedAmount}/month on AI tools`,
+    title: `Audit results — SpendLens`,
     description: 'Free AI spend audit — see where your startup is overspending',
     openGraph: {
-      title: `I could save $${savedAmount}/month on AI tools`,
+      title: `Audit results — SpendLens`,
       description: 'Free AI spend audit — see where your startup is overspending',
-      url: shareUrl,
+      url: `/results/${id}`,
+      images: [`/api/og/${id}`],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Audit results — SpendLens`,
+      description: 'Free AI spend audit — see where your startup is overspending',
+      images: [`/api/og/${id}`],
     },
   }
 }

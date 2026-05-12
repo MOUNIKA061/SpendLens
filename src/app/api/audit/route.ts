@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     }
 
-    audit.summary = generateSummary(audit)
+    audit.summary = await generateSummary(audit)
 
     return NextResponse.json(audit)
   } catch (error) {
