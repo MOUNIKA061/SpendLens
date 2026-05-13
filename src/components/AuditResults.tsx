@@ -90,12 +90,17 @@ export function AuditResults({ auditId }: { auditId: string }) {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-[#050816] px-6 py-10 text-slate-100 lg:px-8" role="status" aria-live="polite" aria-label="Loading audit results">
+      <div
+        className="min-h-screen bg-[#050816] px-6 py-10 text-slate-100 lg:px-8"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading audit results"
+      >
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-          <div className="h-10 w-40 rounded-full bg-white/10 animate-pulse" />
+          <div className="h-10 w-40 animate-pulse rounded-full bg-white/10" />
           <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5 animate-pulse" />
-            <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5 animate-pulse" />
+            <div className="h-72 animate-pulse rounded-[2rem] border border-white/10 bg-white/5" />
+            <div className="h-72 animate-pulse rounded-[2rem] border border-white/10 bg-white/5" />
           </div>
           <p className="text-sm text-slate-400">
             Loading audit results… {retryCount > 0 ? `retry ${retryCount}/4` : ''}
@@ -120,13 +125,13 @@ export function AuditResults({ auditId }: { auditId: string }) {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/audit"
-                className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
               >
                 Start new audit
               </Link>
               <button
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-slate-950"
+                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10 focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
               >
                 Reload page
               </button>
@@ -148,13 +153,13 @@ export function AuditResults({ auditId }: { auditId: string }) {
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/audit"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
             aria-label="Go back to audit form"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to audit
           </Link>
-          <ShareButton className="border border-white/10 bg-white/5 text-slate-100 hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950" />
+          <ShareButton className="border border-white/10 bg-white/5 text-slate-100 hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none" />
         </div>
 
         <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">

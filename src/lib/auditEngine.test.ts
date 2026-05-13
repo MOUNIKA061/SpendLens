@@ -120,6 +120,6 @@ describe('auditTools', () => {
     expect(res.length).toBeGreaterThan(0)
     const first = res[0]
     expect(first.pricingWarning).toBe(true)
-    expect(first.reason).toMatch(/Pricing data from/) 
+    expect(first.reason).toMatch(/Pricing data from/)
   })
 })
