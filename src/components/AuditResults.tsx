@@ -90,15 +90,15 @@ export function AuditResults({ auditId }: { auditId: string }) {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-[#050816] px-6 py-10 text-slate-100 lg:px-8">
+      <div className="min-h-screen bg-[#050816] px-6 py-10 text-slate-100 lg:px-8" role="status" aria-live="polite" aria-label="Loading audit results">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-          <div className="h-10 w-40 rounded-full bg-white/10" />
+          <div className="h-10 w-40 rounded-full bg-white/10 animate-pulse" />
           <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5" />
-            <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5" />
+            <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5 animate-pulse" />
+            <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5 animate-pulse" />
           </div>
           <p className="text-sm text-slate-400">
-            Loading audit results… {retryCount > 0 ? `retry ${retryCount}` : ''}
+            Loading audit results… {retryCount > 0 ? `retry ${retryCount}/4` : ''}
           </p>
         </div>
       </div>
@@ -110,20 +110,27 @@ export function AuditResults({ auditId }: { auditId: string }) {
       <div className="min-h-screen bg-[#050816] px-6 py-10 text-slate-100 lg:px-8">
         <div className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center justify-center">
           <div className="w-full rounded-[2rem] border border-white/10 bg-white/5 p-8 text-center shadow-2xl shadow-emerald-950/20 backdrop-blur">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-300">
               <Sparkles className="h-7 w-7" />
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-white">Audit not found</h1>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              This browser does not have the saved audit yet. Run a new audit to view the results
-              here.
+              This audit isn't saved locally. Run a new audit or wait for the results page to load.
             </p>
-            <Link
-              href="/audit"
-              className="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-            >
-              Start a new audit
-            </Link>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Link
+                href="/audit"
+                className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+              >
+                Start new audit
+              </Link>
+              <button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-slate-950"
+              >
+                Reload page
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -141,12 +148,13 @@ export function AuditResults({ auditId }: { auditId: string }) {
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/audit"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950"
+            aria-label="Go back to audit form"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to audit
           </Link>
-          <ShareButton className="border border-white/10 bg-white/5 text-slate-100 hover:border-emerald-400/40 hover:bg-emerald-400/10" />
+          <ShareButton className="border border-white/10 bg-white/5 text-slate-100 hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950" />
         </div>
 
         <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
