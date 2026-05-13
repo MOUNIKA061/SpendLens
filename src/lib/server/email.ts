@@ -10,7 +10,23 @@ type LeadRecord = {
   auditId?: string
 }
 
+function getPublicBaseUrl(): string {
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+
+  if (!configuredUrl) return 'https://spendlens.app'
+
+  if (configuredUrl.startsWith('http://') || configuredUrl.startsWith('https://')) {
+    return configuredUrl.replace(/\/$/, '')
+  }
+
+  return `https://${configuredUrl.replace(/\/$/, '')}`
+}
+
 function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
+  const publicBaseUrl = getPublicBaseUrl()
+  const auditUrl = lead.auditId ? `${publicBaseUrl}/results/${lead.auditId}` : publicBaseUrl
+
   // Format savings with thousands separator
   const formatCurrency = (num: number) => `$${Math.round(num).toLocaleString()}`
 
@@ -22,9 +38,9 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         <td style="padding:0">
           <table width="100%" style="margin-top:24px;border-collapse:collapse">
             <tr>
-              <td style="background:linear-gradient(135deg,#dbeafe 0%,#e0f2fe 100%);border-left:4px solid #0284c7;padding:16px;border-radius:4px">
-                <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#0c4a6e">💼 Credex Consultation</p>
-                <p style="margin:0;font-size:13px;color:#0369a1;line-height:1.5">At your savings scale, Credex can help unlock additional value through procurement optimization and cloud credit strategies. <strong><a href="https://credex.ai" style="color:#0284c7;text-decoration:underline">Learn more →</a></strong></p>
+              <td style="background:#0f172a;border:1px solid #1f2937;border-left:4px solid #10b981;padding:16px;border-radius:8px">
+                <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#d1fae5">💼 Credex Consultation</p>
+                <p style="margin:0;font-size:13px;color:#cbd5e1;line-height:1.5">At your savings scale, Credex can help unlock additional value through procurement optimization and cloud credit strategies. <strong><a href="https://credex.ai" style="color:#6ee7b7;text-decoration:underline">Learn more →</a></strong></p>
               </td>
             </tr>
           </table>
@@ -41,12 +57,12 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
           <table width="100%" style="margin-top:24px;border-collapse:collapse">
             <tr>
               <td style="padding:0 0 12px 0">
-                <p style="margin:0;font-size:14px;font-weight:600;color:#1e293b">📋 Audit Insights</p>
+                <p style="margin:0;font-size:14px;font-weight:600;color:#a7f3d0">📋 Audit Insights</p>
               </td>
             </tr>
             <tr>
-              <td style="background:#f8fafc;padding:16px;border-radius:6px;border-left:3px solid #8b5cf6">
-                <p style="margin:0;font-size:14px;line-height:1.6;color:#334155">${audit.summary}</p>
+              <td style="background:#0f172a;padding:16px;border-radius:8px;border:1px solid #1f2937;border-left:3px solid #10b981">
+                <p style="margin:0;font-size:14px;line-height:1.6;color:#e2e8f0">${audit.summary}</p>
               </td>
             </tr>
           </table>
@@ -59,12 +75,12 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
           <table width="100%" style="margin-top:24px;border-collapse:collapse">
             <tr>
               <td style="padding:0 0 12px 0">
-                <p style="margin:0;font-size:14px;font-weight:600;color:#1e293b">📋 Key Findings</p>
+                <p style="margin:0;font-size:14px;font-weight:600;color:#a7f3d0">📋 Key Findings</p>
               </td>
             </tr>
             <tr>
-              <td style="background:#f8fafc;padding:16px;border-radius:6px;border-left:3px solid #8b5cf6">
-                <p style="margin:0;font-size:14px;line-height:1.6;color:#334155">Your current AI tool stack shows several optimization opportunities. By consolidating redundant tools and negotiating better rates on your highest-spend services, you could reduce costs while maintaining or improving productivity.</p>
+              <td style="background:#0f172a;padding:16px;border-radius:8px;border:1px solid #1f2937;border-left:3px solid #10b981">
+                <p style="margin:0;font-size:14px;line-height:1.6;color:#e2e8f0">Your current AI tool stack shows several optimization opportunities. By consolidating redundant tools and negotiating better rates on your highest-spend services, you could reduce costs while maintaining or improving productivity.</p>
               </td>
             </tr>
           </table>
@@ -81,11 +97,11 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
       <td style="padding:12px 0;border-bottom:1px solid #e2e8f0">
         <table width="100%" style="border-collapse:collapse">
           <tr>
-            <td style="vertical-align:top;padding-right:12px;width:24px;font-weight:700;color:#8b5cf6;font-size:16px">${idx + 1}</td>
+            <td style="vertical-align:top;padding-right:12px;width:24px;font-weight:700;color:#6ee7b7;font-size:16px">${idx + 1}</td>
             <td style="vertical-align:top">
-              <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#1e293b">${tool.toolName}</p>
-              <p style="margin:0;font-size:13px;color:#64748b">${tool.recommendedAction}</p>
-              <p style="margin:4px 0 0;font-size:13px;font-weight:600;color:#059669">Save ${formatCurrency(tool.monthlySavings)}/month</p>
+              <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#f8fafc">${tool.toolName}</p>
+              <p style="margin:0;font-size:13px;color:#cbd5e1">${tool.recommendedAction}</p>
+              <p style="margin:4px 0 0;font-size:13px;font-weight:600;color:#6ee7b7">Save ${formatCurrency(tool.monthlySavings)}/month</p>
             </td>
           </tr>
         </table>
@@ -104,8 +120,8 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         <td style="padding:0">
           <table width="100%" style="margin-top:16px;border-collapse:collapse">
             <tr>
-              <td style="background:#fffbeb;padding:12px 14px;border-radius:4px;border-left:3px solid #f59e0b">
-                <p style="margin:0;font-size:12px;color:#92400e"><strong>⚠ Note:</strong> ${lowConfidenceTools.map((t) => t.toolName).join(', ')} have lower confidence estimates. Validate with your team before acting.</p>
+              <td style="background:#1f2937;padding:12px 14px;border-radius:8px;border:1px solid #334155;border-left:3px solid #f59e0b">
+                <p style="margin:0;font-size:12px;color:#f8fafc"><strong>⚠ Note:</strong> ${lowConfidenceTools.map((t) => t.toolName).join(', ')} have lower confidence estimates. Validate with your team before acting.</p>
               </td>
             </tr>
           </table>
@@ -122,8 +138,8 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         <td style="padding:0">
           <table width="100%" style="margin-top:24px;border-collapse:collapse">
             <tr>
-              <td style="background:#f0fdf4;padding:16px;border-radius:6px;border-left:3px solid #16a34a">
-                <p style="margin:0;font-size:14px;line-height:1.5;color:#166534"><strong>✓ Well Optimized</strong><br />Your current stack appears to be well-balanced for your use case. Focus on monitoring for new tools or price changes.</p>
+              <td style="background:#0f172a;padding:16px;border-radius:8px;border:1px solid #1f2937;border-left:3px solid #10b981">
+                <p style="margin:0;font-size:14px;line-height:1.5;color:#d1fae5"><strong>✓ Well Optimized</strong><br />Your current stack appears to be well-balanced for your use case. Focus on monitoring for new tools or price changes.</p>
               </td>
             </tr>
           </table>
@@ -140,17 +156,17 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Your SpendLens Audit Report</title>
       </head>
-      <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;line-height:1.6;color:#0f172a;margin:0;padding:0;background:#f9fafb">
-        <table width="100%" style="border-collapse:collapse;background:#f9fafb">
+      <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;line-height:1.6;color:#e2e8f0;margin:0;padding:0;background:#020617">
+        <table width="100%" style="border-collapse:collapse;background:#020617">
           <tr>
             <td style="padding:40px 20px">
-              <table width="100%" style="max-width:600px;margin:0 auto;border-collapse:collapse;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+              <table width="100%" style="max-width:600px;margin:0 auto;border-collapse:collapse;background:#0b1220;border:1px solid #1f2937;border-radius:16px;box-shadow:0 20px 50px rgba(4,8,20,0.45)">
                 <!-- Header -->
                 <tr>
-                  <td style="background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);padding:32px 24px;text-align:center;border-radius:8px 8px 0 0">
+                  <td style="background:linear-gradient(135deg,#052e16 0%,#0f172a 100%);padding:32px 24px;text-align:center;border-radius:16px 16px 0 0;border-bottom:1px solid #1f2937">
                     <p style="margin:0;font-size:28px">🎯</p>
                     <h1 style="margin:8px 0 4px;font-size:24px;font-weight:700;color:#fff">Your Audit is Ready</h1>
-                    <p style="margin:0;font-size:14px;color:#ede9fe">AI-Powered Spending Analysis</p>
+                    <p style="margin:0;font-size:14px;color:#a7f3d0">AI-Powered Spending Analysis</p>
                   </td>
                 </tr>
 
@@ -161,8 +177,8 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
                       <!-- Greeting -->
                       <tr>
                         <td style="padding:0 0 24px 0">
-                          <p style="margin:0;font-size:15px;line-height:1.6;color:#334155">Hi${lead.companyName ? ` ${lead.companyName.split(' ')[0]}` : ''},</p>
-                          <p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#475569">We've completed your AI tool audit and discovered some meaningful optimization opportunities for your team.</p>
+                          <p style="margin:0;font-size:15px;line-height:1.6;color:#e2e8f0">Hi${lead.companyName ? ` ${lead.companyName.split(' ')[0]}` : ''},</p>
+                          <p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#cbd5e1">We've completed your AI tool audit and discovered some meaningful optimization opportunities for your stack.</p>
                         </td>
                       </tr>
 
@@ -171,17 +187,17 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
                         <td style="padding:0">
                           <table width="100%" style="border-collapse:collapse">
                             <tr>
-                              <td style="padding:16px;text-align:center;background:#f0f4ff;border-radius:6px;width:33.3%">
-                                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6366f1">Monthly Savings</p>
-                                <p style="margin:6px 0 0;font-size:28px;font-weight:700;color:#4f46e5">${formatCurrency(audit.totalMonthlySavings)}</p>
+                              <td style="padding:16px;text-align:center;background:#0f172a;border:1px solid #1f2937;border-radius:10px;width:33.3%">
+                                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6ee7b7">Monthly Savings</p>
+                                <p style="margin:6px 0 0;font-size:28px;font-weight:700;color:#fff">${formatCurrency(audit.totalMonthlySavings)}</p>
                               </td>
-                              <td style="padding:16px;text-align:center;background:#f0fdf4;border-radius:6px;width:33.3%">
-                                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#16a34a">Annual Impact</p>
-                                <p style="margin:6px 0 0;font-size:28px;font-weight:700;color:#15803d">${formatCurrency(audit.totalAnnualSavings)}</p>
+                              <td style="padding:16px;text-align:center;background:#0f172a;border:1px solid #1f2937;border-radius:10px;width:33.3%">
+                                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6ee7b7">Annual Impact</p>
+                                <p style="margin:6px 0 0;font-size:28px;font-weight:700;color:#fff">${formatCurrency(audit.totalAnnualSavings)}</p>
                               </td>
-                              <td style="padding:16px;text-align:center;background:#fef3c7;border-radius:6px;width:33.3%">
-                                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#b45309">% of Spend</p>
-                                <p style="margin:6px 0 0;font-size:28px;font-weight:700;color:#d97706">${audit.totalSavingsPercent?.toFixed(1) || '—'}%</p>
+                              <td style="padding:16px;text-align:center;background:#0f172a;border:1px solid #1f2937;border-radius:10px;width:33.3%">
+                                <p style="margin:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6ee7b7">% of Spend</p>
+                                <p style="margin:6px 0 0;font-size:28px;font-weight:700;color:#fff">${audit.totalSavingsPercent?.toFixed(1) || '—'}%</p>
                               </td>
                             </tr>
                           </table>
@@ -225,13 +241,13 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
                         <td style="padding:0">
                           <table width="100%" style="margin-top:28px;border-collapse:collapse">
                             <tr>
-                              <td style="text-align:center;padding-top:24px;border-top:1px solid #e2e8f0">
-                                <a href="https://spendlens.app" style="display:inline-block;padding:12px 32px;background:#8b5cf6;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px">View Full Audit Details</a>
+                              <td style="text-align:center;padding-top:24px;border-top:1px solid #1f2937">
+                                <a href="${auditUrl}" style="display:inline-block;padding:12px 32px;background:#10b981;color:#052e16;text-decoration:none;border-radius:999px;font-weight:700;font-size:14px">View Your Audit Results</a>
                               </td>
                             </tr>
                             <tr>
                               <td style="text-align:center;padding:16px 0 0 0">
-                                <p style="margin:0;font-size:12px;color:#64748b">Share your results with your team using your secure audit link.</p>
+                                <p style="margin:0;font-size:12px;color:#94a3b8">Share your secure results link with your team or reopen the full report anytime.</p>
                               </td>
                             </tr>
                           </table>
@@ -243,13 +259,13 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
 
                 <!-- Footer -->
                 <tr>
-                  <td style="padding:24px;text-align:center;border-top:1px solid #e2e8f0;background:#f8fafc;border-radius:0 0 8px 8px">
+                  <td style="padding:24px;text-align:center;border-top:1px solid #1f2937;background:#0b1220;border-radius:0 0 16px 16px">
                     <p style="margin:0;font-size:12px;color:#94a3b8">
                       <strong>SpendLens</strong> — Optimize your AI tool spending<br />
-                      <a href="https://spendlens.app" style="color:#8b5cf6;text-decoration:none">spendlens.app</a>
+                      <a href="${publicBaseUrl}" style="color:#6ee7b7;text-decoration:none">spendlens.app</a>
                     </p>
                     <p style="margin:8px 0 0;font-size:11px;color:#cbd5e1">
-                      Questions? <a href="mailto:hello@spendlens.app" style="color:#8b5cf6;text-decoration:none">Contact us</a>
+                      Questions? <a href="mailto:hello@spendlens.app" style="color:#6ee7b7;text-decoration:none">Contact us</a>
                     </p>
                   </td>
                 </tr>

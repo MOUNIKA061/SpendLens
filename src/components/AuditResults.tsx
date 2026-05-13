@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   BadgeDollarSign,
   CheckCircle2,
+  Home,
   Sparkles,
   TrendingDown,
   Users,
@@ -18,7 +19,6 @@ import { FullAudit } from '@/types'
 
 import { LeadCapture } from './LeadCapture'
 import { ShareButton } from './ShareButton'
-import { Mail } from 'lucide-react'
 
 function formatMoney(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -152,14 +152,24 @@ export function AuditResults({ auditId }: { auditId: string }) {
       <LeadCapture auditId={auditId} source="credex" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-8 lg:px-8 lg:py-10">
         <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/audit"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
-            aria-label="Go back to audit form"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to audit
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
+              aria-label="Go to home page"
+            >
+              <Home className="h-4 w-4" aria-hidden="true" />
+              Home
+            </Link>
+            <Link
+              href="/audit"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none"
+              aria-label="Go back to audit form"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Back to audit
+            </Link>
+          </div>
           <ShareButton className="border border-white/10 bg-white/5 text-slate-100 hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none" />
         </div>
 
@@ -219,27 +229,7 @@ export function AuditResults({ auditId }: { auditId: string }) {
             <p className="mt-3 text-sm tracking-[0.2em] text-emerald-100/70 uppercase">
               saved per month
             </p>
-            {audit.totalMonthlySavings > 500 ? (
-              <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-sm leading-6 text-emerald-50">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="font-semibold">
-                      Credex can help you capture more of these savings.
-                    </div>
-                    <div className="mt-1 text-sm text-emerald-50/80">
-                      We can help operationalize and capture additional vendor discounts and
-                      switching ROI.
-                    </div>
-                  </div>
-                  <a
-                    href={`mailto:sales@spendlens.com?subject=Credex%20savings%20help%20for%20audit%20${auditId}`}
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-900/30 px-3 py-2 text-sm font-semibold text-emerald-50 shadow-md hover:bg-emerald-900/40"
-                  >
-                    <Mail className="h-4 w-4" /> Get Credex help
-                  </a>
-                </div>
-              </div>
-            ) : lowSavings ? (
+            {lowSavings ? (
               <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-200">
                 <div className="font-semibold">You’re spending efficiently.</div>
                 <div className="mt-1">

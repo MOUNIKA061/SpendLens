@@ -1,18 +1,18 @@
-# 🎯 SpendLens — AI Spend Audit for Startup Founders
+# 🎯 SpendLens — AI Spend Audit for Founders, Teams, and Individuals
 
-**SpendLens** is an AI-powered spend auditing web app that helps startup founders identify wasteful, redundant, or overpriced AI tool subscriptions in minutes. You enter your current AI tool stack, and SpendLens runs a defensible audit across four check types — right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription comparisons — then emails you a personalized savings report.
+**SpendLens** is an AI-powered spend auditing web app that helps founders, teams, and individuals identify wasteful, redundant, or overpriced AI tool subscriptions in minutes. You enter your current AI tool stack, and SpendLens runs a defensible audit across four check types — right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription comparisons — then emails you a personalized savings report.
 
 ---
 
 ## 🖥️ Screenshots / Demo
 
-> **Add 3 screenshots here** (drag & drop into GitHub):
+> **Screenshots / Demo:**
 >
-> 1. SpendForm — tool entry with billing type, use case, usage frequency fields
-> 2. Audit Results — monthly/annual savings dashboard + top 3 recommendations
-> 3. Confirmation email with savings breakdown
+> - SpendForm — tool entry with billing type, use case, usage frequency fields
+> - Audit Results — monthly/annual savings dashboard + top 3 recommendations
+> - Confirmation email with savings breakdown
 >
-> 🎥 **Demo Recording:** _[Add your Loom or YouTube link here]_
+> 🎥 **Demo Recording:** Not included in this repository snapshot
 
 ## ✨ What It Does
 
@@ -89,7 +89,7 @@ vercel --prod
 
 Add all `.env.local` variables under **Vercel → Settings → Environment Variables**.
 
-**🌐 Deployed URL:** _[Add your Vercel URL here]_
+**🌐 Deployed URL:** https://spend-lens-tawny.vercel.app
 
 ---
 

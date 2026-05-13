@@ -11,7 +11,9 @@ export default function Home() {
             <p className="text-sm font-semibold tracking-[0.24em] text-emerald-200 uppercase">
               SpendLens
             </p>
-            <p className="text-xs text-slate-400">Free AI spend audit for startup founders</p>
+            <p className="text-xs text-slate-400">
+              Free AI spend audit for founders, teams, and individuals
+            </p>
           </div>
           <Link
             href="/audit"
@@ -32,8 +34,8 @@ export default function Home() {
               Find out where your AI budget is leaking.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
-              Free audit for startups. No signup needed. See which tools are overpriced, which plans
-              are wrong-sized, and what you could save every month.
+              Free audit for founders, teams, and individuals. No signup needed. See which tools are
+              overpriced, which plans are wrong-sized, and what you could save every month.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -79,14 +81,15 @@ export default function Home() {
                 Cursor, Copilot, Claude, ChatGPT, and API tools in one audit.
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">
-                Built for founders who want the budget answer, not another dashboard.
+                Built for anyone who wants the budget answer, not another dashboard.
               </div>
             </div>
           </aside>
         </section>
 
         <footer className="border-t border-white/10 py-6 text-sm text-slate-400">
-          Built by GitHub Copilot for Credex Web Dev Assignment
+          SpendLens helps startup founders audit AI tool spend, surface waste, and share clear
+          savings reports.
         </footer>
       </div>
     </main>

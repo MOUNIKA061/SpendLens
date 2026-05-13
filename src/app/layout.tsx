@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'SpendLens',
-  description: 'Free AI spend audit for startup founders.',
+  description: 'Free AI spend audit for founders, teams, and individuals.',
 }
 
 export default function RootLayout({
