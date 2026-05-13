@@ -53,18 +53,22 @@ Audit JSON:
 ## Error Handling & Fallback Logic
 
 **Missing GEMINI_API_KEY:**
+
 - Logs: `"GEMINI_API_KEY not set, using fallback summary"`
 - Returns: Deterministic templated summary
 
 **Rate Limited (HTTP 429):**
+
 - Logs: `"Rate limited, returning fallback summary"`
 - Returns: Fallback immediately without retry
 
 **API Error or Timeout:**
+
 - Logs: Error message for debugging
 - Returns: Fallback summary
 
 **Empty Response:**
+
 - Detects zero-length text from Gemini
 - Logs: `"Gemini returned empty response, using fallback summary"`
 - Returns: Fallback
@@ -76,6 +80,7 @@ function buildFallbackSummary(audit: FullAudit): string
 ```
 
 Defined in `src/lib/summaryGenerator.ts` (or inline in `src/lib/server/aiSummary.ts`):
+
 - ~80-word templated summary using: team size, primary use case, tool count, top savings opportunity, annual savings projection, Credex eligibility
 - Deterministic: No external API calls, always succeeds
 - Language quality: Professional, finance-grade tone (same as Gemini target)

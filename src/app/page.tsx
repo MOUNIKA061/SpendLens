@@ -8,7 +8,9 @@ export default function Home() {
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 lg:px-8">
         <header className="flex items-center justify-between gap-4 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">SpendLens</p>
+            <p className="text-sm font-semibold tracking-[0.24em] text-emerald-200 uppercase">
+              SpendLens
+            </p>
             <p className="text-xs text-slate-400">Free AI spend audit for startup founders</p>
           </div>
           <Link
@@ -22,7 +24,7 @@ export default function Home() {
 
         <section className="grid flex-1 items-center gap-12 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:py-24">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold tracking-[0.24em] text-emerald-200 uppercase">
               <Sparkles className="h-3.5 w-3.5" />
               Fintech-grade spend analysis
             </div>
@@ -30,8 +32,8 @@ export default function Home() {
               Find out where your AI budget is leaking.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
-              Free audit for startups. No signup needed. See which tools are overpriced, which plans are wrong-sized,
-              and what you could save every month.
+              Free audit for startups. No signup needed. See which tools are overpriced, which plans
+              are wrong-sized, and what you could save every month.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -49,12 +51,11 @@ export default function Home() {
             </div>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              {[
-                'Instant analysis',
-                'No login needed',
-                'Shareable report',
-              ].map(feature => (
-                <div key={feature} className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 backdrop-blur">
+              {['Instant analysis', 'No login needed', 'Shareable report'].map((feature) => (
+                <div
+                  key={feature}
+                  className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 backdrop-blur"
+                >
                   <CheckCircle2 className="h-4 w-4 text-emerald-300" />
                   {feature}
                 </div>
@@ -64,14 +65,22 @@ export default function Home() {
 
           <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-emerald-950/20 backdrop-blur">
             <div className="rounded-[1.5rem] border border-emerald-400/20 bg-slate-950/60 p-6">
-              <p className="text-xs uppercase tracking-[0.24em] text-emerald-200/70">Typical leak</p>
+              <p className="text-xs tracking-[0.24em] text-emerald-200/70 uppercase">
+                Typical leak
+              </p>
               <div className="mt-4 text-5xl font-semibold tracking-tight text-white">$780</div>
-              <p className="mt-2 text-sm leading-6 text-slate-300">Average monthly savings surfaced when teams right-size AI tooling.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Average monthly savings surfaced when teams right-size AI tooling.
+              </p>
             </div>
 
             <div className="mt-5 space-y-3 text-sm text-slate-200">
-              <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">Cursor, Copilot, Claude, ChatGPT, and API tools in one audit.</div>
-              <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">Built for founders who want the budget answer, not another dashboard.</div>
+              <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">
+                Cursor, Copilot, Claude, ChatGPT, and API tools in one audit.
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">
+                Built for founders who want the budget answer, not another dashboard.
+              </div>
             </div>
           </aside>
         </section>
@@ -81,5 +90,5 @@ export default function Home() {
         </footer>
       </div>
     </main>
-  );
+  )
 }

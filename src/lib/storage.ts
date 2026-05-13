@@ -13,7 +13,7 @@ export function generateId(): string {
 
 export function saveAudit(audit: FullAudit): void {
   if (typeof window === 'undefined') return
-  
+
   const audits = getAllAudits()
   audits[audit.id] = audit
   localStorage.setItem(AUDITS_KEY, JSON.stringify(audits))
@@ -21,7 +21,7 @@ export function saveAudit(audit: FullAudit): void {
 
 export function getAudit(id: string): FullAudit | null {
   if (typeof window === 'undefined') return null
-  
+
   const audits = getAllAudits()
   return audits[id] || null
 }

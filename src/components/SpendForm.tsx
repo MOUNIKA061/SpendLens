@@ -11,7 +11,21 @@ import { AuditInput, SpendFormDraft, ToolInput, UseCase, PrimaryUseCase } from '
 const TOOL_IDS = Object.keys(TOOLS) as Array<keyof typeof TOOLS>
 // Global use case options: only PrimaryUseCase for team-level fallback
 const USE_CASES: PrimaryUseCase[] = ['coding', 'writing', 'data', 'research', 'mixed']
-const DEFAULT_PLAN_ORDER = ['hobby', 'individual', 'free', 'pro', 'plus', 'team', 'business', 'enterprise', 'max', 'teams', 'usage', 'api', 'ultra']
+const DEFAULT_PLAN_ORDER = [
+  'hobby',
+  'individual',
+  'free',
+  'pro',
+  'plus',
+  'team',
+  'business',
+  'enterprise',
+  'max',
+  'teams',
+  'usage',
+  'api',
+  'ultra',
+]
 
 type BillingType = 'subscription' | 'api' | 'hybrid'
 type UsageFrequency = 'daily' | 'weekly' | 'occasionally'
@@ -135,7 +149,17 @@ const TOOL_USE_CASES: Array<{ id: UseCase; label: string }> = [
   { id: 'mixed', label: 'Mixed' },
 ]
 
-const INDUSTRIES = ['Software', 'SaaS', 'AI', 'Fintech', 'Healthtech', 'E-commerce', 'Media', 'Consulting', 'Other'] as const
+const INDUSTRIES = [
+  'Software',
+  'SaaS',
+  'AI',
+  'Fintech',
+  'Healthtech',
+  'E-commerce',
+  'Media',
+  'Consulting',
+  'Other',
+] as const
 
 function getDefaultProviderPlan(providerId: keyof typeof TOOL_CONFIG): ProviderPlan {
   return TOOL_CONFIG[providerId].plans[0]
@@ -157,9 +181,10 @@ function createRichToolEntry(providerId: keyof typeof TOOL_CONFIG = 'cursor'): R
 }
 
 function normalizeRichToolEntry(entry: Partial<RichToolEntry> & { id?: string }): RichToolEntry {
-  const providerId = entry.providerId && entry.providerId in TOOL_CONFIG ? entry.providerId : 'cursor'
+  const providerId =
+    entry.providerId && entry.providerId in TOOL_CONFIG ? entry.providerId : 'cursor'
   const config = TOOL_CONFIG[providerId as keyof typeof TOOL_CONFIG]
-  const planExists = entry.planId ? config.plans.some(plan => plan.id === entry.planId) : false
+  const planExists = entry.planId ? config.plans.some((plan) => plan.id === entry.planId) : false
   const defaultPlan = getDefaultProviderPlan(providerId as keyof typeof TOOL_CONFIG)
 
   return {
@@ -168,18 +193,28 @@ function normalizeRichToolEntry(entry: Partial<RichToolEntry> & { id?: string })
     planId: planExists ? (entry.planId as string) : defaultPlan.id,
     monthlySpend: Number(entry.monthlySpend ?? 0),
     seats: Math.max(1, Number(entry.seats ?? 1)),
-    billingType: (['subscription', 'api', 'hybrid'] as const).includes(entry.billingType as BillingType)
+    billingType: (['subscription', 'api', 'hybrid'] as const).includes(
+      entry.billingType as BillingType,
+    )
       ? (entry.billingType as BillingType)
       : 'subscription',
-    useCases: Array.isArray(entry.useCases) && entry.useCases.length > 0 ? Array.from(new Set(entry.useCases)) as UseCase[] : ['mixed'],
-    usageFrequency: entry.usageFrequency === 'weekly' || entry.usageFrequency === 'occasionally' ? entry.usageFrequency : 'daily',
+    useCases:
+      Array.isArray(entry.useCases) && entry.useCases.length > 0
+        ? (Array.from(new Set(entry.useCases)) as UseCase[])
+        : ['mixed'],
+    usageFrequency:
+      entry.usageFrequency === 'weekly' || entry.usageFrequency === 'occasionally'
+        ? entry.usageFrequency
+        : 'daily',
     notes: typeof entry.notes === 'string' ? entry.notes : '',
   }
 }
 
 function richToolEntryToAuditTool(entry: RichToolEntry): ToolInput {
   const provider = TOOL_CONFIG[entry.providerId]
-  const plan = provider.plans.find(option => option.id === entry.planId) ?? getDefaultProviderPlan(entry.providerId)
+  const plan =
+    provider.plans.find((option) => option.id === entry.planId) ??
+    getDefaultProviderPlan(entry.providerId)
 
   // Per-tool use case: pick the first selected use case, fall back to 'mixed'
   // Note: Per-tool use case overrides global use case in audit logic
@@ -218,11 +253,7 @@ function formatMoney(value: number): string {
 
 function getDefaultPlanKey(toolId: keyof typeof TOOLS): string {
   const planKeys = Object.keys(TOOLS[toolId].plans)
-  return (
-    DEFAULT_PLAN_ORDER.find(planKey => planKeys.includes(planKey)) ??
-    planKeys[0] ??
-    'pro'
-  )
+  return DEFAULT_PLAN_ORDER.find((planKey) => planKeys.includes(planKey)) ?? planKeys[0] ?? 'pro'
 }
 
 function createTool(toolId: keyof typeof TOOLS): ToolInput {
@@ -232,7 +263,7 @@ function createTool(toolId: keyof typeof TOOLS): ToolInput {
   return {
     toolId,
     plan,
-    seats: 1,  // Default for subscription/hybrid; optional for API
+    seats: 1, // Default for subscription/hybrid; optional for API
     monthlySpend: planConfig[plan]?.pricePerSeat ?? 0,
     billingType: 'subscription',
     useCase: 'mixed',
@@ -263,13 +294,18 @@ function normalizeDraft(draft: unknown) {
       step: Math.min(Math.max(Number(candidate.step || 1), 1), 2),
       companyName: typeof candidate.companyName === 'string' ? candidate.companyName : '',
       industry:
-        typeof candidate.industry === 'string' && INDUSTRIES.includes(candidate.industry as (typeof INDUSTRIES)[number])
+        typeof candidate.industry === 'string' &&
+        INDUSTRIES.includes(candidate.industry as (typeof INDUSTRIES)[number])
           ? (candidate.industry as (typeof INDUSTRIES)[number])
           : ('Other' as (typeof INDUSTRIES)[number]),
       estimatedMonthlyBudget: Number(candidate.estimatedMonthlyBudget || 0),
       teamSize: Math.max(1, Number(candidate.teamSize || 5)),
-      useCase: USE_CASES.includes(candidate.useCase as PrimaryUseCase) ? (candidate.useCase as PrimaryUseCase) : 'mixed',
-      toolEntries: rawToolEntries.map(entry => normalizeRichToolEntry(entry as Partial<RichToolEntry> & { id?: string })),
+      useCase: USE_CASES.includes(candidate.useCase as PrimaryUseCase)
+        ? (candidate.useCase as PrimaryUseCase)
+        : 'mixed',
+      toolEntries: rawToolEntries.map((entry) =>
+        normalizeRichToolEntry(entry as Partial<RichToolEntry> & { id?: string }),
+      ),
     }
   }
 
@@ -280,7 +316,9 @@ function normalizeDraft(draft: unknown) {
     .map((toolIdValue: unknown) => {
       const toolId = typeof toolIdValue === 'string' ? toolIdValue : ''
       const legacyTool = legacyTools.find((tool: unknown) => {
-        return tool && typeof tool === 'object' && (tool as Record<string, unknown>).toolId === toolId
+        return (
+          tool && typeof tool === 'object' && (tool as Record<string, unknown>).toolId === toolId
+        )
       }) as Record<string, unknown> | undefined
 
       if (!toolId || !Object.prototype.hasOwnProperty.call(TOOLS, toolId)) {
@@ -288,8 +326,13 @@ function normalizeDraft(draft: unknown) {
       }
 
       const providerId = toolId as keyof typeof TOOL_CONFIG
-      const planName = typeof legacyTool?.plan === 'string' ? legacyTool.plan : getDefaultProviderPlan(providerId).id
-      const normalizedPlan = TOOL_CONFIG[providerId].plans.find(plan => plan.id === planName) ? planName : getDefaultProviderPlan(providerId).id
+      const planName =
+        typeof legacyTool?.plan === 'string'
+          ? legacyTool.plan
+          : getDefaultProviderPlan(providerId).id
+      const normalizedPlan = TOOL_CONFIG[providerId].plans.find((plan) => plan.id === planName)
+        ? planName
+        : getDefaultProviderPlan(providerId).id
 
       return normalizeRichToolEntry({
         id: typeof legacyTool?.toolId === 'string' ? `${legacyTool.toolId}_${toolId}` : undefined,
@@ -311,7 +354,9 @@ function normalizeDraft(draft: unknown) {
     industry: 'Other' as (typeof INDUSTRIES)[number],
     estimatedMonthlyBudget: 0,
     teamSize: Math.max(1, Number(candidate.teamSize || 5)),
-    useCase: USE_CASES.includes(candidate.useCase as PrimaryUseCase) ? (candidate.useCase as PrimaryUseCase) : 'mixed',
+    useCase: USE_CASES.includes(candidate.useCase as PrimaryUseCase)
+      ? (candidate.useCase as PrimaryUseCase)
+      : 'mixed',
     toolEntries: toolEntries.length > 0 ? toolEntries : [fallbackEntry],
   }
 }
@@ -328,7 +373,10 @@ export function SpendForm() {
   const [loading, setLoading] = useState(false)
   const [hydrated, setHydrated] = useState(false)
 
-  const tools = useMemo(() => toolEntries.map(entry => richToolEntryToAuditTool(entry)), [toolEntries])
+  const tools = useMemo(
+    () => toolEntries.map((entry) => richToolEntryToAuditTool(entry)),
+    [toolEntries],
+  )
   const totalMonthlySpend = useMemo(
     () => toolEntries.reduce((sum, entry) => sum + entry.monthlySpend, 0),
     [toolEntries],
@@ -358,22 +406,38 @@ export function SpendForm() {
       useCase,
       toolEntries,
     } as any)
-  }, [hydrated, step, companyName, industry, estimatedMonthlyBudget, teamSize, useCase, toolEntries])
+  }, [
+    hydrated,
+    step,
+    companyName,
+    industry,
+    estimatedMonthlyBudget,
+    teamSize,
+    useCase,
+    toolEntries,
+  ])
 
   const addToolEntry = () => {
-    setToolEntries(prev => [...prev, createRichToolEntry(prev.length === 0 ? 'cursor' : 'github_copilot')])
+    setToolEntries((prev) => [
+      ...prev,
+      createRichToolEntry(prev.length === 0 ? 'cursor' : 'github_copilot'),
+    ])
   }
 
   const removeToolEntry = (entryId: string) => {
-    setToolEntries(prev => {
-      const nextEntries = prev.filter(entry => entry.id !== entryId)
+    setToolEntries((prev) => {
+      const nextEntries = prev.filter((entry) => entry.id !== entryId)
       return nextEntries.length > 0 ? nextEntries : [createRichToolEntry()]
     })
   }
 
-  const updateToolEntry = <K extends keyof RichToolEntry>(entryId: string, field: K, value: RichToolEntry[K]) => {
-    setToolEntries(prev =>
-      prev.map(entry => {
+  const updateToolEntry = <K extends keyof RichToolEntry>(
+    entryId: string,
+    field: K,
+    value: RichToolEntry[K],
+  ) => {
+    setToolEntries((prev) =>
+      prev.map((entry) => {
         if (entry.id !== entryId) {
           return entry
         }
@@ -397,8 +461,8 @@ export function SpendForm() {
   }
 
   const updateTool = <K extends keyof ToolInput>(toolId: string, field: K, value: ToolInput[K]) => {
-    setToolEntries(prev =>
-      prev.map(entry => {
+    setToolEntries((prev) =>
+      prev.map((entry) => {
         const auditTool = richToolEntryToAuditTool(entry)
         if (auditTool.toolId !== toolId) {
           return entry
@@ -406,7 +470,9 @@ export function SpendForm() {
 
         if (field === 'plan') {
           const providerPlans = TOOL_CONFIG[entry.providerId].plans
-          const matchedPlan = providerPlans.find(plan => plan.auditPlan === value || plan.id === value)
+          const matchedPlan = providerPlans.find(
+            (plan) => plan.auditPlan === value || plan.id === value,
+          )
           return {
             ...entry,
             planId: matchedPlan?.id ?? entry.planId,
@@ -440,8 +506,6 @@ export function SpendForm() {
 
     setStep(2)
   }
-
-  
 
   const handleSubmit = async () => {
     if (tools.length === 0) {
@@ -506,23 +570,31 @@ export function SpendForm() {
         <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20 backdrop-blur">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold tracking-[0.24em] text-emerald-200 uppercase">
                 <Sparkles className="h-3.5 w-3.5" />
                 Audit flow
               </div>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Audit your AI spend</h1>
-                <p className="mt-2 text-sm text-slate-400">Step {step} of 2. Drafts save automatically to your browser.</p>
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Audit your AI spend
+              </h1>
+              <p className="mt-2 text-sm text-slate-400">
+                Step {step} of 2. Drafts save automatically to your browser.
+              </p>
             </div>
             <div className="hidden rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-right sm:block">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Current monthly spend</p>
-              <p className="mt-1 text-xl font-semibold text-white">{formatMoney(totalMonthlySpend)}</p>
+              <p className="text-xs tracking-[0.18em] text-slate-500 uppercase">
+                Current monthly spend
+              </p>
+              <p className="mt-1 text-xl font-semibold text-white">
+                {formatMoney(totalMonthlySpend)}
+              </p>
             </div>
           </div>
 
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-lime-300 transition-all duration-300"
-               style={{ width: `${(step / 2) * 100}%` }}
+              style={{ width: `${(step / 2) * 100}%` }}
             />
           </div>
         </div>
@@ -531,7 +603,7 @@ export function SpendForm() {
           <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/15 backdrop-blur">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.18em] text-emerald-200/80">Step 1</p>
+                <p className="text-sm tracking-[0.18em] text-emerald-200/80 uppercase">Step 1</p>
                 <h2 className="mt-1 text-2xl font-semibold text-white">Spend Intake</h2>
                 <p className="mt-2 text-sm text-slate-400">
                   Capture the company profile and every AI tool in use before the audit runs.
@@ -545,7 +617,9 @@ export function SpendForm() {
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-white">AI tool stack</h3>
-                    <p className="mt-1 text-sm text-slate-400">Add every tool and model the current billing setup.</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Add every tool and model the current billing setup.
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -562,15 +636,22 @@ export function SpendForm() {
                       Add a tool entry to start modeling your spend.
                     </div>
                   ) : (
-                    toolEntries.map(entry => {
+                    toolEntries.map((entry) => {
                       const provider = TOOL_CONFIG[entry.providerId]
 
                       return (
-                        <article key={entry.id} className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 shadow-sm">
+                        <article
+                          key={entry.id}
+                          className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 shadow-sm"
+                        >
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Tool entry</p>
-                              <h4 className="mt-1 text-base font-semibold text-white">{provider.label}</h4>
+                              <p className="text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Tool entry
+                              </p>
+                              <h4 className="mt-1 text-base font-semibold text-white">
+                                {provider.label}
+                              </h4>
                             </div>
                             <button
                               type="button"
@@ -583,14 +664,26 @@ export function SpendForm() {
 
                           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                             <label className="space-y-2 text-sm text-slate-300">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">AI provider</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                AI provider
+                              </span>
                               <select
                                 value={entry.providerId}
-                                onChange={event => updateToolEntry(entry.id, 'providerId', event.target.value as keyof typeof TOOL_CONFIG)}
-                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
+                                onChange={(event) =>
+                                  updateToolEntry(
+                                    entry.id,
+                                    'providerId',
+                                    event.target.value as keyof typeof TOOL_CONFIG,
+                                  )
+                                }
+                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white transition outline-none focus:border-emerald-400/40"
                               >
                                 {Object.entries(TOOL_CONFIG).map(([providerId, providerOption]) => (
-                                  <option key={providerId} value={providerId} className="bg-slate-950 text-white">
+                                  <option
+                                    key={providerId}
+                                    value={providerId}
+                                    className="bg-slate-950 text-white"
+                                  >
                                     {providerOption.label}
                                   </option>
                                 ))}
@@ -598,14 +691,22 @@ export function SpendForm() {
                             </label>
 
                             <label className="space-y-2 text-sm text-slate-300">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Plan</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Plan
+                              </span>
                               <select
                                 value={entry.planId}
-                                onChange={event => updateToolEntry(entry.id, 'planId', event.target.value)}
-                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
+                                onChange={(event) =>
+                                  updateToolEntry(entry.id, 'planId', event.target.value)
+                                }
+                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white transition outline-none focus:border-emerald-400/40"
                               >
-                                {provider.plans.map(plan => (
-                                  <option key={plan.id} value={plan.id} className="bg-slate-950 text-white">
+                                {provider.plans.map((plan) => (
+                                  <option
+                                    key={plan.id}
+                                    value={plan.id}
+                                    className="bg-slate-950 text-white"
+                                  >
                                     {plan.label}
                                   </option>
                                 ))}
@@ -613,55 +714,83 @@ export function SpendForm() {
                             </label>
 
                             <label className="space-y-2 text-sm text-slate-300">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Monthly spend</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Monthly spend
+                              </span>
                               <input
                                 type="number"
                                 min="0"
                                 step="1"
                                 value={entry.monthlySpend}
-                                onChange={event => updateToolEntry(entry.id, 'monthlySpend', Math.max(0, Number(event.target.value) || 0))}
-                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
+                                onChange={(event) =>
+                                  updateToolEntry(
+                                    entry.id,
+                                    'monthlySpend',
+                                    Math.max(0, Number(event.target.value) || 0),
+                                  )
+                                }
+                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white transition outline-none focus:border-emerald-400/40"
                               />
-                              <p className="text-xs text-slate-500">Recorded as {formatMoney(entry.monthlySpend)} / month</p>
+                              <p className="text-xs text-slate-500">
+                                Recorded as {formatMoney(entry.monthlySpend)} / month
+                              </p>
                             </label>
 
                             <label className="space-y-2 text-sm text-slate-300">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Number of seats</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Number of seats
+                              </span>
                               <input
                                 type="number"
                                 min="1"
                                 step="1"
                                 value={entry.seats}
-                                onChange={event => updateToolEntry(entry.id, 'seats', Math.max(1, Number(event.target.value) || 1))}
-                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
+                                onChange={(event) =>
+                                  updateToolEntry(
+                                    entry.id,
+                                    'seats',
+                                    Math.max(1, Number(event.target.value) || 1),
+                                  )
+                                }
+                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white transition outline-none focus:border-emerald-400/40"
                               />
                             </label>
 
                             <div className="space-y-2 text-sm text-slate-300 md:col-span-2 lg:col-span-2">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Billing type</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Billing type
+                              </span>
                               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                                {BILLING_TYPES.map(option => (
+                                {BILLING_TYPES.map((option) => (
                                   <button
                                     key={option.id}
                                     type="button"
-                                    onClick={() => updateToolEntry(entry.id, 'billingType', option.id)}
+                                    onClick={() =>
+                                      updateToolEntry(entry.id, 'billingType', option.id)
+                                    }
                                     className={`rounded-xl border px-3 py-3 text-left transition ${
                                       entry.billingType === option.id
                                         ? 'border-emerald-400/40 bg-emerald-400/10 text-white'
                                         : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10'
                                     }`}
                                   >
-                                    <span className="block text-sm font-medium">{option.label}</span>
-                                    <span className="mt-1 block text-[11px] text-slate-500">{option.description}</span>
+                                    <span className="block text-sm font-medium">
+                                      {option.label}
+                                    </span>
+                                    <span className="mt-1 block text-[11px] text-slate-500">
+                                      {option.description}
+                                    </span>
                                   </button>
                                 ))}
                               </div>
                             </div>
 
                             <div className="space-y-2 text-sm text-slate-300 md:col-span-2 lg:col-span-3">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Primary use case</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Primary use case
+                              </span>
                               <div className="flex flex-wrap gap-2">
-                                {TOOL_USE_CASES.map(useCaseOption => {
+                                {TOOL_USE_CASES.map((useCaseOption) => {
                                   const isActive = entry.useCases.includes(useCaseOption.id)
 
                                   return (
@@ -670,10 +799,16 @@ export function SpendForm() {
                                       type="button"
                                       onClick={() => {
                                         const nextUseCases = isActive
-                                          ? entry.useCases.filter(value => value !== useCaseOption.id)
+                                          ? entry.useCases.filter(
+                                              (value) => value !== useCaseOption.id,
+                                            )
                                           : [...entry.useCases, useCaseOption.id]
 
-                                        updateToolEntry(entry.id, 'useCases', nextUseCases.length > 0 ? nextUseCases : ['mixed'])
+                                        updateToolEntry(
+                                          entry.id,
+                                          'useCases',
+                                          nextUseCases.length > 0 ? nextUseCases : ['mixed'],
+                                        )
                                       }}
                                       className={`rounded-full border px-3 py-2 text-sm transition ${
                                         isActive
@@ -689,33 +824,43 @@ export function SpendForm() {
                             </div>
 
                             <div className="space-y-2 text-sm text-slate-300 md:col-span-2 lg:col-span-3">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Usage frequency</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Usage frequency
+                              </span>
                               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                {USAGE_FREQUENCIES.map(option => (
+                                {USAGE_FREQUENCIES.map((option) => (
                                   <button
                                     key={option.id}
                                     type="button"
-                                    onClick={() => updateToolEntry(entry.id, 'usageFrequency', option.id)}
+                                    onClick={() =>
+                                      updateToolEntry(entry.id, 'usageFrequency', option.id)
+                                    }
                                     className={`rounded-xl border px-3 py-3 text-left transition ${
                                       entry.usageFrequency === option.id
                                         ? 'border-emerald-400/40 bg-emerald-400/10 text-white'
                                         : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10'
                                     }`}
                                   >
-                                    <span className="block text-sm font-medium">{option.label}</span>
+                                    <span className="block text-sm font-medium">
+                                      {option.label}
+                                    </span>
                                   </button>
                                 ))}
                               </div>
                             </div>
 
                             <label className="space-y-2 text-sm text-slate-300 md:col-span-2 lg:col-span-3">
-                              <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Optional notes</span>
+                              <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                                Optional notes
+                              </span>
                               <textarea
                                 rows={3}
                                 value={entry.notes}
-                                onChange={event => updateToolEntry(entry.id, 'notes', event.target.value)}
+                                onChange={(event) =>
+                                  updateToolEntry(entry.id, 'notes', event.target.value)
+                                }
                                 placeholder="Context like seat mix, billing quirks, or special contract terms."
-                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-400/40"
+                                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white transition outline-none placeholder:text-slate-500 focus:border-emerald-400/40"
                               />
                             </label>
                           </div>
@@ -744,7 +889,7 @@ export function SpendForm() {
           <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/15 backdrop-blur">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.18em] text-emerald-200/80">Step 2</p>
+                <p className="text-sm tracking-[0.18em] text-emerald-200/80 uppercase">Step 2</p>
                 <h2 className="mt-1 text-2xl font-semibold text-white">Team size and use case</h2>
               </div>
               <button
@@ -759,21 +904,25 @@ export function SpendForm() {
 
             <div className="mt-6 grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
               <label className="space-y-2 text-sm text-slate-300">
-                <span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Team size</span>
+                <span className="block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                  Team size
+                </span>
                 <input
                   type="number"
                   min="1"
                   step="1"
                   value={teamSize}
-                  onChange={event => setTeamSize(Math.max(1, Number(event.target.value) || 1))}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white outline-none transition focus:border-emerald-400/40"
+                  onChange={(event) => setTeamSize(Math.max(1, Number(event.target.value) || 1))}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-white transition outline-none focus:border-emerald-400/40"
                 />
               </label>
 
               <div>
-                <span className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-500">Primary use case</span>
+                <span className="mb-2 block text-xs tracking-[0.18em] text-slate-500 uppercase">
+                  Primary use case
+                </span>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                  {USE_CASES.map(caseOption => (
+                  {USE_CASES.map((caseOption) => (
                     <button
                       key={caseOption}
                       type="button"

@@ -7,6 +7,7 @@ SpendLens is designed to use Supabase Postgres in production.
 Stores the full persisted audit payload.
 
 Suggested columns:
+
 - `id` text primary key
 - `input` jsonb not null
 - `results` jsonb not null
@@ -21,6 +22,7 @@ Suggested columns:
 Stores the public share snapshot.
 
 Suggested columns:
+
 - `id` text primary key
 - `results` jsonb not null
 - `total_monthly_savings` numeric not null
@@ -34,6 +36,7 @@ Suggested columns:
 Stores notify-me and Credex signups.
 
 Suggested columns:
+
 - `id` uuid primary key default gen_random_uuid()
 - `email` text not null
 - `company_name` text null
@@ -59,6 +62,7 @@ SpendLens sends confirmation emails after lead capture via Resend.
 ### Current Status
 
 **Development:** Using Resend's default domain (`onboarding@resend.dev`)
+
 - Works immediately, no verification needed
 - Subject line: "SpendLens Audit: $X/month in savings identified"
 - Email template includes audit summary and Credex follow-up CTA
@@ -94,6 +98,7 @@ When ready to use your own domain (e.g., `noreply@spendlens.app`):
 ### Email Behavior
 
 **If domain is unverified:**
+
 - API returns error: "Invalid from address" or "domain not verified"
 - Lead is still saved to Supabase ✅
 - Audit result is still shown to user ✅
@@ -101,6 +106,7 @@ When ready to use your own domain (e.g., `noreply@spendlens.app`):
 - User sees success UI (email is optional)
 
 **If domain is verified:**
+
 - Email sends successfully ✅
 - Lead receives confirmation with audit summary
 - Includes monthly savings, annual impact, top 3 opportunities

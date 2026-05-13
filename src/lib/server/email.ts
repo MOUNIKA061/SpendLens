@@ -15,13 +15,14 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
   const formatCurrency = (num: number) => `$${Math.round(num).toLocaleString()}`
 
   // Find top opportunity
-  const topOpportunity = audit.results.reduce((best, current) => 
-    current.monthlySavings > best.monthlySavings ? current : best
+  const topOpportunity = audit.results.reduce((best, current) =>
+    current.monthlySavings > best.monthlySavings ? current : best,
   )
 
   // Credex callout for high-savings audits
-  const credexSection = audit.totalMonthlySavings > 500
-    ? `
+  const credexSection =
+    audit.totalMonthlySavings > 500
+      ? `
       <tr>
         <td style="padding:0">
           <table width="100%" style="margin-top:24px;border-collapse:collapse">
@@ -35,7 +36,7 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         </td>
       </tr>
     `
-    : ''
+      : ''
 
   // AI summary section (the core "tips")
   const summarySection = audit.summary
@@ -77,7 +78,10 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
     `
 
   // Top 3 recommendations with better formatting
-  const topThreeHtml = audit.results.slice(0, 3).map((tool, idx) => `
+  const topThreeHtml = audit.results
+    .slice(0, 3)
+    .map(
+      (tool, idx) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #e2e8f0">
         <table width="100%" style="border-collapse:collapse">
@@ -92,29 +96,33 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         </table>
       </td>
     </tr>
-  `).join('')
+  `,
+    )
+    .join('')
 
   // Low confidence note if applicable
-  const lowConfidenceTools = audit.results.filter(r => r.confidence === 'low')
-  const confidenceNote = lowConfidenceTools.length > 0
-    ? `
+  const lowConfidenceTools = audit.results.filter((r) => r.confidence === 'low')
+  const confidenceNote =
+    lowConfidenceTools.length > 0
+      ? `
       <tr>
         <td style="padding:0">
           <table width="100%" style="margin-top:16px;border-collapse:collapse">
             <tr>
               <td style="background:#fffbeb;padding:12px 14px;border-radius:4px;border-left:3px solid #f59e0b">
-                <p style="margin:0;font-size:12px;color:#92400e"><strong>⚠ Note:</strong> ${lowConfidenceTools.map(t => t.toolName).join(', ')} have lower confidence estimates. Validate with your team before acting.</p>
+                <p style="margin:0;font-size:12px;color:#92400e"><strong>⚠ Note:</strong> ${lowConfidenceTools.map((t) => t.toolName).join(', ')} have lower confidence estimates. Validate with your team before acting.</p>
               </td>
             </tr>
           </table>
         </td>
       </tr>
     `
-    : ''
+      : ''
 
   // Message for very low savings
-  const lowSavingsMessage = audit.totalMonthlySavings < 50
-    ? `
+  const lowSavingsMessage =
+    audit.totalMonthlySavings < 50
+      ? `
       <tr>
         <td style="padding:0">
           <table width="100%" style="margin-top:24px;border-collapse:collapse">
@@ -127,7 +135,7 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
         </td>
       </tr>
     `
-    : ''
+      : ''
 
   return `
     <!DOCTYPE html>
@@ -290,7 +298,10 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
  * - If custom domain: must be verified in Resend dashboard first
  * - Domain unverified error typically: "Invalid from address" or "domain not verified"
  */
-export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAudit): Promise<{
+export async function sendAuditConfirmationEmail(
+  lead: LeadRecord,
+  audit: FullAudit,
+): Promise<{
   success: boolean
   error?: string
   isDomainIssue?: boolean
@@ -299,7 +310,11 @@ export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAu
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'SpendLens <onboarding@resend.dev>'
 
   // DEBUG: Log API key presence
-  console.log('[EMAIL] DEBUG: API Key loaded?', !!apiKey, apiKey ? `(${apiKey.substring(0, 10)}...)` : 'UNDEFINED')
+  console.log(
+    '[EMAIL] DEBUG: API Key loaded?',
+    !!apiKey,
+    apiKey ? `(${apiKey.substring(0, 10)}...)` : 'UNDEFINED',
+  )
   console.log('[EMAIL] DEBUG: From email:', fromEmail)
 
   if (!apiKey) {
@@ -319,7 +334,7 @@ export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAu
   try {
     const resend = new Resend(apiKey)
     const htmlContent = buildConfirmationHtml(lead, audit)
-    
+
     console.info('[EMAIL] 📤 Calling Resend API...', {
       to: lead.email,
       from: fromEmail,
@@ -335,11 +350,12 @@ export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAu
 
     if (result.error) {
       const errorMsg = result.error.message
-      const isDomainError = errorMsg.includes('domain') || 
-                           errorMsg.includes('from address') || 
-                           errorMsg.includes('verified') ||
-                           errorMsg.toLowerCase().includes('unverified')
-      
+      const isDomainError =
+        errorMsg.includes('domain') ||
+        errorMsg.includes('from address') ||
+        errorMsg.includes('verified') ||
+        errorMsg.toLowerCase().includes('unverified')
+
       console.error('[EMAIL] ❌ Resend API error:', {
         to: lead.email,
         auditId: lead.auditId,
@@ -348,11 +364,11 @@ export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAu
         fromEmail,
         fullError: result.error,
       })
-      
-      return { 
-        success: false, 
+
+      return {
+        success: false,
         error: errorMsg,
-        isDomainIssue: isDomainError
+        isDomainIssue: isDomainError,
       }
     }
 
@@ -362,22 +378,23 @@ export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAu
       emailId: result.data?.id,
       from: fromEmail,
     })
-    
+
     console.info('[EMAIL] ✅ Email sent successfully', {
       to: lead.email,
       auditId: lead.auditId,
       emailId: result.data?.id,
     })
-    
+
     return { success: true }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     const errorStack = error instanceof Error ? error.stack : undefined
-    const isDomainError = errorMessage.includes('domain') || 
-                         errorMessage.includes('from address') ||
-                         errorMessage.includes('verified') ||
-                         errorMessage.toLowerCase().includes('unverified')
-    
+    const isDomainError =
+      errorMessage.includes('domain') ||
+      errorMessage.includes('from address') ||
+      errorMessage.includes('verified') ||
+      errorMessage.toLowerCase().includes('unverified')
+
     console.error('[EMAIL] ❌ Email delivery failed (exception):', {
       to: lead.email,
       auditId: lead.auditId,
@@ -394,10 +411,10 @@ export async function sendAuditConfirmationEmail(lead: LeadRecord, audit: FullAu
       return { success: false, error: 'Rate limited' }
     }
 
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: errorMessage,
-      isDomainIssue: isDomainError
+      isDomainIssue: isDomainError,
     }
   }
 }

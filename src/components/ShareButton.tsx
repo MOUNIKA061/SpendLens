@@ -20,7 +20,10 @@ export function ShareButton({ className }: { className?: string }) {
   return (
     <button
       onClick={handleShare}
-      className={className ?? 'px-6 py-2 rounded-full bg-emerald-400 text-slate-950 font-semibold transition hover:bg-emerald-300'}
+      className={
+        className ??
+        'rounded-full bg-emerald-400 px-6 py-2 font-semibold text-slate-950 transition hover:bg-emerald-300'
+      }
     >
       {copied ? 'Copied to clipboard' : 'Share Audit'}
     </button>

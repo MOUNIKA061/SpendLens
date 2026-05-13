@@ -36,11 +36,27 @@ export async function GET(_req: Request, context: any) {
         createElement(
           'div',
           null,
-          createElement('div', { style: { fontSize: '28px', color: '#86efac', fontWeight: 700 } }, 'SpendLens'),
-          createElement('div', { style: { marginTop: '18px', fontSize: '28px', color: '#cbd5e1' } }, 'Saved'),
           createElement(
             'div',
-            { style: { fontSize: '88px', fontWeight: 800, lineHeight: 1.0, marginTop: '8px', color: '#f8fafc' } },
+            { style: { fontSize: '28px', color: '#86efac', fontWeight: 700 } },
+            'SpendLens',
+          ),
+          createElement(
+            'div',
+            { style: { marginTop: '18px', fontSize: '28px', color: '#cbd5e1' } },
+            'Saved',
+          ),
+          createElement(
+            'div',
+            {
+              style: {
+                fontSize: '88px',
+                fontWeight: 800,
+                lineHeight: 1.0,
+                marginTop: '8px',
+                color: '#f8fafc',
+              },
+            },
             `$${audit.totalMonthlySavings}/mo`,
           ),
           createElement(
@@ -60,9 +76,21 @@ export async function GET(_req: Request, context: any) {
               border: '1px solid rgba(255,255,255,0.10)',
             },
           },
-          createElement('div', { style: { fontSize: '18px', color: '#94a3b8' } }, 'Top opportunity'),
-          createElement('div', { style: { marginTop: '8px', fontSize: '28px', fontWeight: 700 } }, topOpportunity?.toolName ?? 'AI stack'),
-          createElement('div', { style: { marginTop: '8px', fontSize: '18px', color: '#cbd5e1' } }, topOpportunity?.recommendedAction ?? 'Optimize spend'),
+          createElement(
+            'div',
+            { style: { fontSize: '18px', color: '#94a3b8' } },
+            'Top opportunity',
+          ),
+          createElement(
+            'div',
+            { style: { marginTop: '8px', fontSize: '28px', fontWeight: 700 } },
+            topOpportunity?.toolName ?? 'AI stack',
+          ),
+          createElement(
+            'div',
+            { style: { marginTop: '8px', fontSize: '18px', color: '#cbd5e1' } },
+            topOpportunity?.recommendedAction ?? 'Optimize spend',
+          ),
         ),
       ),
       createElement(
@@ -73,7 +101,11 @@ export async function GET(_req: Request, context: any) {
           { style: { fontSize: '26px', color: '#cbd5e1', maxWidth: '760px', lineHeight: 1.3 } },
           'AI spend audit results, optimized for sharing and screenshots.',
         ),
-        createElement('div', { style: { fontSize: '24px', color: '#86efac', fontWeight: 700 } }, 'spendlens.app'),
+        createElement(
+          'div',
+          { style: { fontSize: '24px', color: '#86efac', fontWeight: 700 } },
+          'spendlens.app',
+        ),
       ),
     ),
     {

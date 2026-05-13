@@ -97,7 +97,9 @@ export function AuditResults({ auditId }: { auditId: string }) {
             <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5" />
             <div className="h-72 rounded-[2rem] border border-white/10 bg-white/5" />
           </div>
-          <p className="text-sm text-slate-400">Loading audit results… {retryCount > 0 ? `retry ${retryCount}` : ''}</p>
+          <p className="text-sm text-slate-400">
+            Loading audit results… {retryCount > 0 ? `retry ${retryCount}` : ''}
+          </p>
         </div>
       </div>
     )
@@ -113,7 +115,8 @@ export function AuditResults({ auditId }: { auditId: string }) {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-white">Audit not found</h1>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              This browser does not have the saved audit yet. Run a new audit to view the results here.
+              This browser does not have the saved audit yet. Run a new audit to view the results
+              here.
             </p>
             <Link
               href="/audit"
@@ -128,7 +131,7 @@ export function AuditResults({ auditId }: { auditId: string }) {
   }
 
   const savingsColor = audit.totalMonthlySavings > 0 ? 'text-emerald-300' : 'text-white'
-  const positiveResults = audit.results.filter(result => result.monthlySavings > 0)
+  const positiveResults = audit.results.filter((result) => result.monthlySavings > 0)
   const lowSavings = audit.totalMonthlySavings < 100 || positiveResults.length === 0
 
   return (
@@ -148,7 +151,7 @@ export function AuditResults({ auditId }: { auditId: string }) {
 
         <section className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
           <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-emerald-950/20 backdrop-blur">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-semibold tracking-[0.24em] text-emerald-200 uppercase">
               <Sparkles className="h-3.5 w-3.5" />
               SpendLens audit
             </div>
@@ -160,8 +163,10 @@ export function AuditResults({ auditId }: { auditId: string }) {
               per month.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-              {audit.input.teamSize}-person team, {audit.input.useCase} focus, {audit.results.length} tool
-              {audit.results.length === 1 ? '' : 's'} analyzed. The current stack spends {formatMoney(totalSpend)} per month.
+              {audit.input.teamSize}-person team, {audit.input.useCase} focus,{' '}
+              {audit.results.length} tool
+              {audit.results.length === 1 ? '' : 's'} analyzed. The current stack spends{' '}
+              {formatMoney(totalSpend)} per month.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -170,7 +175,9 @@ export function AuditResults({ auditId }: { auditId: string }) {
                   <Wallet className="h-4 w-4 text-emerald-300" />
                   Monthly spend
                 </div>
-                <div className="mt-2 text-2xl font-semibold text-white">{formatMoney(totalSpend)}</div>
+                <div className="mt-2 text-2xl font-semibold text-white">
+                  {formatMoney(totalSpend)}
+                </div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
                 <div className="flex items-center gap-2 text-sm text-slate-400">
@@ -195,13 +202,20 @@ export function AuditResults({ auditId }: { auditId: string }) {
             <div className={`text-5xl font-semibold tracking-tight ${savingsColor}`}>
               {formatMoney(audit.totalMonthlySavings)}
             </div>
-            <p className="mt-3 text-sm uppercase tracking-[0.2em] text-emerald-100/70">saved per month</p>
+            <p className="mt-3 text-sm tracking-[0.2em] text-emerald-100/70 uppercase">
+              saved per month
+            </p>
             {audit.totalMonthlySavings > 500 ? (
               <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-sm leading-6 text-emerald-50">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <div className="font-semibold">Credex can help you capture more of these savings.</div>
-                    <div className="mt-1 text-sm text-emerald-50/80">We can help operationalize and capture additional vendor discounts and switching ROI.</div>
+                    <div className="font-semibold">
+                      Credex can help you capture more of these savings.
+                    </div>
+                    <div className="mt-1 text-sm text-emerald-50/80">
+                      We can help operationalize and capture additional vendor discounts and
+                      switching ROI.
+                    </div>
                   </div>
                   <a
                     href={`mailto:sales@spendlens.com?subject=Credex%20savings%20help%20for%20audit%20${auditId}`}
@@ -214,7 +228,10 @@ export function AuditResults({ auditId }: { auditId: string }) {
             ) : lowSavings ? (
               <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-slate-200">
                 <div className="font-semibold">You’re spending efficiently.</div>
-                <div className="mt-1">Your current AI stack already appears well optimized. We won’t manufacture savings.</div>
+                <div className="mt-1">
+                  Your current AI stack already appears well optimized. We won’t manufacture
+                  savings.
+                </div>
                 <div className="mt-3 flex items-center gap-2">
                   <input
                     type="email"
@@ -263,7 +280,7 @@ export function AuditResults({ auditId }: { auditId: string }) {
               Highest-impact recommendations
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
-              {audit.results.map(result => {
+              {audit.results.map((result) => {
                 const recommendedSpend = Math.max(0, result.currentSpend - result.monthlySavings)
                 const hasSavings = result.monthlySavings > 0
                 const toolConfig = TOOLS[result.toolId as keyof typeof TOOLS]
@@ -275,10 +292,12 @@ export function AuditResults({ auditId }: { auditId: string }) {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">
+                        <p className="text-sm tracking-[0.2em] text-slate-400 uppercase">
                           {toolConfig?.name ?? result.toolName}
                         </p>
-                        <h2 className="mt-1 text-2xl font-semibold text-white">{result.recommendedAction}</h2>
+                        <h2 className="mt-1 text-2xl font-semibold text-white">
+                          {result.recommendedAction}
+                        </h2>
                       </div>
                       <div className="flex items-center gap-3">
                         <div
@@ -288,23 +307,37 @@ export function AuditResults({ auditId }: { auditId: string }) {
                               : 'bg-white/5 text-slate-300'
                           }`}
                         >
-                          {hasSavings ? `${formatMoney(result.monthlySavings)} saved` : 'No savings'}
+                          {hasSavings
+                            ? `${formatMoney(result.monthlySavings)} saved`
+                            : 'No savings'}
                         </div>
                         {result.pricingWarning ? (
-                          <div className="rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-200">Pricing may be stale</div>
+                          <div className="rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-200">
+                            Pricing may be stale
+                          </div>
                         ) : null}
-                        <div className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-300">{result.confidence}</div>
-                        <div className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-300">{result.riskLevel}</div>
+                        <div className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-300">
+                          {result.confidence}
+                        </div>
+                        <div className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-300">
+                          {result.riskLevel}
+                        </div>
                       </div>
                     </div>
 
                     <div className="mt-5 grid gap-3 sm:grid-cols-2">
                       <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Current</p>
-                        <p className="mt-2 text-xl font-semibold text-white">{formatMoney(result.currentSpend)}</p>
+                        <p className="text-xs tracking-[0.18em] text-slate-500 uppercase">
+                          Current
+                        </p>
+                        <p className="mt-2 text-xl font-semibold text-white">
+                          {formatMoney(result.currentSpend)}
+                        </p>
                       </div>
                       <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Recommended</p>
+                        <p className="text-xs tracking-[0.18em] text-slate-500 uppercase">
+                          Recommended
+                        </p>
                         <p className="mt-2 text-xl font-semibold text-emerald-200">
                           {hasSavings ? formatMoney(recommendedSpend) : 'Keep as-is'}
                         </p>

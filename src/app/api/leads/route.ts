@@ -7,7 +7,11 @@ import type { LeadSubmission } from '@/types'
 const recentSubmissions = new Map<string, number>()
 
 function getClientKey(request: NextRequest): string {
-  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'anonymous'
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'anonymous'
+  )
 }
 
 /**
@@ -88,7 +92,7 @@ export async function POST(request: NextRequest) {
         summaryLength: audit.summary?.length || 0,
         totalSavings: audit.totalMonthlySavings,
       })
-      
+
       try {
         const emailResult = await sendAuditConfirmationEmail(
           {
@@ -108,10 +112,10 @@ export async function POST(request: NextRequest) {
             auditId: payload.auditId,
           })
         } else {
-          const reason = emailResult.isDomainIssue 
-            ? 'Resend domain not verified (waiting for production setup)' 
+          const reason = emailResult.isDomainIssue
+            ? 'Resend domain not verified (waiting for production setup)'
             : emailResult.error
-          
+
           console.warn('[LEADS] ⚠️ Email delivery failed', {
             email: payload.email,
             auditId: payload.auditId,

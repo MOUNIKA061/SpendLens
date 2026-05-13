@@ -5,7 +5,7 @@ import type { FullAudit } from '@/types'
 import { GEMINI_SYSTEM_PROMPT, buildAuditSummaryPrompt } from '@/lib/prompts'
 
 function buildFallbackSummary(audit: FullAudit): string {
-  const positiveResults = audit.results.filter(result => result.monthlySavings > 0)
+  const positiveResults = audit.results.filter((result) => result.monthlySavings > 0)
   const topResult = [...positiveResults].sort((a, b) => b.monthlySavings - a.monthlySavings)[0]
 
   if (audit.totalMonthlySavings <= 0) {
@@ -17,9 +17,10 @@ function buildFallbackSummary(audit: FullAudit): string {
   const recommendationLine = topResult
     ? `The largest opportunity is ${topResult.toolName}, where ${topResult.reason}`
     : 'The largest opportunity is concentrated in your highest-spend tool and appears low-risk to evaluate.'
-  const credexLine = audit.totalMonthlySavings > 500
-    ? 'At this scale, Credex can help your team capture more of the savings through procurement and credit optimization.'
-    : ''
+  const credexLine =
+    audit.totalMonthlySavings > 500
+      ? 'At this scale, Credex can help your team capture more of the savings through procurement and credit optimization.'
+      : ''
 
   return [opener, recommendationLine, credexLine].filter(Boolean).join(' ')
 }

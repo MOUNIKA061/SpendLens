@@ -10,11 +10,15 @@ function isAuditInput(value: unknown): value is AuditInput {
   if (!value || typeof value !== 'object') return false
 
   const candidate = value as AuditInput
-  if (!Array.isArray(candidate.tools) || typeof candidate.teamSize !== 'number' || !VALID_USE_CASES.includes(candidate.useCase)) {
+  if (
+    !Array.isArray(candidate.tools) ||
+    typeof candidate.teamSize !== 'number' ||
+    !VALID_USE_CASES.includes(candidate.useCase)
+  ) {
     return false
   }
 
-  return candidate.tools.every(tool => {
+  return candidate.tools.every((tool) => {
     return (
       tool &&
       typeof tool.toolId === 'string' &&
@@ -38,10 +42,11 @@ export async function POST(request: NextRequest) {
     const results = auditTools(input)
     const totalMonthlySavings = results.reduce((sum, r) => sum + r.monthlySavings, 0)
     const totalAnnualSavings = totalMonthlySavings * 12
-    
+
     // Calculate total current spend for relative savings
     const totalCurrentSpend = input.tools.reduce((sum, t) => sum + t.monthlySpend, 0)
-    const totalSavingsPercent = totalCurrentSpend > 0 ? (totalMonthlySavings / totalCurrentSpend) * 100 : 0
+    const totalSavingsPercent =
+      totalCurrentSpend > 0 ? (totalMonthlySavings / totalCurrentSpend) * 100 : 0
 
     const id = generateId()
 

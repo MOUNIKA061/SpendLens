@@ -3,6 +3,7 @@
 ## Overview
 
 SpendLens is now a fully integrated production SaaS application with:
+
 - Deterministic audit engine (no AI-based calculations)
 - Supabase persistence (with JSON file fallback)
 - AI-powered personalized summaries via Google Gemini
@@ -21,11 +22,13 @@ SpendLens is now a fully integrated production SaaS application with:
 **Fallback:** JSON files in `data/audits.json` and `data/leads.json`
 
 **Tables:**
+
 - `audits` — Full private audit payloads (input, results, summary)
 - `public_audits` — Public snapshots (results, totals, summary only; no input)
 - `leads` — Lead captures (email, company, audit reference)
 
 **Logging:**
+
 ```
 [PERSISTENCE] Supabase client initialized
 [PERSISTENCE] Audit saved to Supabase
@@ -36,26 +39,31 @@ SpendLens is now a fully integrated production SaaS application with:
 ### API Routes
 
 #### `POST /api/audit`
+
 - Accepts spend form input
 - Runs deterministic audit engine
 - Generates Gemini summary (or fallback)
 - Returns FullAudit with all results
 
 #### `POST /api/audits`
+
 - Persists audit to Supabase or JSON
 - Non-critical route (backup persistence)
 
 #### `GET /api/audits/[id]`
+
 - Retrieves audit from Supabase or JSON
 - Used by AuditResults component
 - Powers public shareable links
 
 #### `POST /api/leads`
+
 - Captures lead with honeypot + rate limiting
 - Saves to Supabase or JSON
 - Sends confirmation email via Resend (async, non-blocking)
 
 #### `GET /api/og/[id]`
+
 - Generates OpenGraph image for shareable URLs
 - Uses public audit data
 - Displays monthly savings, top opportunity, company branding
@@ -68,6 +76,7 @@ SpendLens is now a fully integrated production SaaS application with:
 **Environment:** `GEMINI_API_KEY`
 
 **Behavior:**
+
 - Generates ~80-120 word personalized summary
 - References specific tools and savings amounts
 - Grounded in audit JSON (no hallucination risk)
@@ -75,6 +84,7 @@ SpendLens is now a fully integrated production SaaS application with:
 - Logs all errors for debugging
 
 **Prompt Anti-Hallucination:**
+
 - System prompt explicitly forbids inventing tools or savings
 - User message contains full audit JSON
 - Constraints enforced: 80-120 words, no markdown, no fabrication
@@ -86,6 +96,7 @@ SpendLens is now a fully integrated production SaaS application with:
 **Environment:** `RESEND_API_KEY`, `RESEND_FROM_EMAIL`
 
 **Flow:**
+
 1. Lead submitted to `/api/leads`
 2. Lead saved to Supabase/JSON
 3. Audit retrieved from persistence
@@ -93,6 +104,7 @@ SpendLens is now a fully integrated production SaaS application with:
 5. Failures logged but don't break lead submission
 
 **Email Content:**
+
 - Audit confirmation with personalized greeting
 - Monthly savings + annual impact
 - Top 3 opportunities highlighted
@@ -100,6 +112,7 @@ SpendLens is now a fully integrated production SaaS application with:
 - Professional HTML template with inline CSS
 
 **Logging:**
+
 ```
 [EMAIL] RESEND_API_KEY not configured, skipping email delivery
 [EMAIL] Confirmation email sent successfully
@@ -113,6 +126,7 @@ SpendLens is now a fully integrated production SaaS application with:
 **Key Design Principle:** Email failures never break the audit or lead capture flow.
 
 **Workflow:**
+
 1. User submits lead form
 2. Lead is saved to Supabase/JSON ✅ (must succeed)
 3. Audit is retrieved ✅ (must succeed)
@@ -121,13 +135,13 @@ SpendLens is now a fully integrated production SaaS application with:
 
 **Failure Scenarios:**
 
-| Issue | Behavior | User Impact | Server Log |
-|-------|----------|-------------|------------|
-| Missing `RESEND_API_KEY` | Skipped | ✅ Success UI | `[EMAIL] RESEND_API_KEY not configured` |
-| Domain unverified | Request fails | ✅ Success UI | `[EMAIL] Resend API error: domain not verified` |
-| Rate limited (429) | Request fails | ✅ Success UI | `[EMAIL] Rate limited by Resend` |
-| Network timeout | Caught, logged | ✅ Success UI | `[EMAIL] Email delivery failed` |
-| Invalid recipient | Request fails | ✅ Success UI | `[EMAIL] Resend API error: invalid email` |
+| Issue                    | Behavior       | User Impact   | Server Log                                      |
+| ------------------------ | -------------- | ------------- | ----------------------------------------------- |
+| Missing `RESEND_API_KEY` | Skipped        | ✅ Success UI | `[EMAIL] RESEND_API_KEY not configured`         |
+| Domain unverified        | Request fails  | ✅ Success UI | `[EMAIL] Resend API error: domain not verified` |
+| Rate limited (429)       | Request fails  | ✅ Success UI | `[EMAIL] Rate limited by Resend`                |
+| Network timeout          | Caught, logged | ✅ Success UI | `[EMAIL] Email delivery failed`                 |
+| Invalid recipient        | Request fails  | ✅ Success UI | `[EMAIL] Resend API error: invalid email`       |
 
 **Production Domain Verification Setup:**
 
@@ -138,6 +152,7 @@ See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) "Transactional Email Configuration"
 **File:** `src/lib/auditEngine.ts`  
 **Type:** Deterministic, hardcoded logic  
 **Scope:** Calculates savings for 8 AI tools based on:
+
 - Current plan + spend
 - Team size
 - Primary use case
@@ -145,14 +160,16 @@ See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) "Transactional Email Configuration"
 - Usage metrics
 
 **Key Logic:**
+
 - API tools: No seat-based optimization (cost varies monthly)
 - Subscription tools: Per-seat analysis
 - Hybrid tools: Both analyses
-- Savings: Relative to current spend (savings / currentSpend * 100)
+- Savings: Relative to current spend (savings / currentSpend \* 100)
 - Confidence: high/medium/low based on data quality
 - Warnings: Pricing data age, risk assessment
 
 **Never AI-calculated:**
+
 - Savings amounts
 - Tool recommendations
 - Switching costs
@@ -179,6 +196,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here  # Optional, falls back to 
 ```
 
 **Local Development:**
+
 - Copy `.env.example` to `.env.local`
 - Fill in all keys
 - Never commit `.env.local`
@@ -189,22 +207,22 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here  # Optional, falls back to 
 
 ### Missing Environment Variables
 
-| Service | Behavior |
-|---------|----------|
-| SUPABASE_* | Uses JSON fallback, logs warning |
-| GEMINI_API_KEY | Uses deterministic fallback summary, logs info |
+| Service        | Behavior                                          |
+| -------------- | ------------------------------------------------- |
+| SUPABASE\_\*   | Uses JSON fallback, logs warning                  |
+| GEMINI_API_KEY | Uses deterministic fallback summary, logs info    |
 | RESEND_API_KEY | Skips email, logs warning, continues lead capture |
 
 ### API Failures
 
-| Scenario | Behavior | Logging |
-|----------|----------|---------|
-| Supabase insert fails | Falls back to JSON | `[PERSISTENCE] Supabase save failed, falling back to JSON` |
-| JSON write fails | Throws error to API | `[PERSISTENCE] JSON fallback also failed` |
-| Gemini timeout | Returns fallback summary | `[EMAIL] Gemini summary generation failed` |
-| Gemini rate limit | Returns fallback summary | `Rate limited, returning fallback summary` |
-| Resend error | Lead still saved, email skipped | `[EMAIL] Resend API error` |
-| Resend rate limit | Lead still saved, email skipped | `[EMAIL] Rate limited by Resend` |
+| Scenario              | Behavior                        | Logging                                                    |
+| --------------------- | ------------------------------- | ---------------------------------------------------------- |
+| Supabase insert fails | Falls back to JSON              | `[PERSISTENCE] Supabase save failed, falling back to JSON` |
+| JSON write fails      | Throws error to API             | `[PERSISTENCE] JSON fallback also failed`                  |
+| Gemini timeout        | Returns fallback summary        | `[EMAIL] Gemini summary generation failed`                 |
+| Gemini rate limit     | Returns fallback summary        | `Rate limited, returning fallback summary`                 |
+| Resend error          | Lead still saved, email skipped | `[EMAIL] Resend API error`                                 |
+| Resend rate limit     | Lead still saved, email skipped | `[EMAIL] Rate limited by Resend`                           |
 
 ### Request Validation
 
@@ -220,10 +238,12 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here  # Optional, falls back to 
 ### Data Segregation
 
 **Private (Full Audit):**
+
 - `audits` table: User input, detailed results, internal fields
 - Accessible only via API with audit ID
 
 **Public (Share Snapshot):**
+
 - `public_audits` table: Results, totals, summary only
 - No input data, no sensitive metrics
 - Safe for OG previews
@@ -231,11 +251,13 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here  # Optional, falls back to 
 ### Secrets
 
 **Never Exposed:**
+
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
 - `RESEND_API_KEY` (server-only)
 - `GEMINI_API_KEY` (server-only)
 
 **Publicly Shared:**
+
 - `SUPABASE_ANON_KEY` (in client code for auth, not used in SpendLens)
 - Public audit results (intentional, shareable)
 
@@ -289,6 +311,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here  # Optional, falls back to 
 ### Pre-Deployment
 
 1. **Supabase Setup**
+
    ```sql
    CREATE TABLE audits (
      id TEXT PRIMARY KEY,
@@ -331,6 +354,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here  # Optional, falls back to 
    - Configure `RESEND_FROM_EMAIL` with verified domain
 
 3. **Build Verification**
+
    ```bash
    npm run build
    # Should succeed with 0 errors
@@ -363,6 +387,7 @@ vercel deploy --prod
 ### Console Output Indicators
 
 **Info Level (Success):**
+
 ```
 [PERSISTENCE] Supabase client initialized
 [PERSISTENCE] Audit saved to Supabase
@@ -371,6 +396,7 @@ vercel deploy --prod
 ```
 
 **Warn Level (Fallback):**
+
 ```
 [PERSISTENCE] Supabase not configured, using JSON fallback
 [PERSISTENCE] Supabase save failed, falling back to JSON
@@ -379,6 +405,7 @@ vercel deploy --prod
 ```
 
 **Error Level (Failures):**
+
 ```
 [PERSISTENCE] Supabase audit insert failed
 [PERSISTENCE] JSON fallback also failed
@@ -399,6 +426,7 @@ vercel deploy --prod
 ### JSON Fallback Cleanup
 
 Once Supabase is stable:
+
 ```bash
 # Back up JSON files
 cp data/audits.json data/audits.backup.json
@@ -411,6 +439,7 @@ cp data/leads.json data/leads.backup.json
 ### Schema Migrations
 
 If adding new fields:
+
 1. Add to TS types in `src/types/index.ts`
 2. Update Supabase schema
 3. Update `persistence.ts` mapping
@@ -419,6 +448,7 @@ If adding new fields:
 ### Pricing Data Updates
 
 Source and validation:
+
 - See `PRICING_DATA.md` for tool-by-tool sources
 - Update `src/lib/pricingData.ts` with new baseline prices
 - Run audit engine test to verify recommendations change as expected
@@ -428,21 +458,25 @@ Source and validation:
 ## Support & Troubleshooting
 
 ### "Audit not found" error
+
 - Check Supabase connection (verify URL and keys)
 - Check JSON fallback file exists: `data/audits.json`
 - Review logs for `[PERSISTENCE]` errors
 
 ### "Email not sent" warning
+
 - Check `RESEND_API_KEY` is set and valid
 - Verify `RESEND_FROM_EMAIL` uses verified Resend domain
 - Review logs for `[EMAIL]` errors
 
 ### "Summary not generated" (using fallback)
+
 - Check `GEMINI_API_KEY` is set and valid
 - Verify rate limits (Google Cloud console)
 - Review logs for Gemini errors
 
 ### Build fails
+
 - Run `npm run build` and check TypeScript errors
 - Verify all environment variables in `.env.local`
 - Check Node.js version (16.x or later)

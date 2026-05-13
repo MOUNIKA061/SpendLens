@@ -2,21 +2,13 @@
  * Primary use case for the entire team — applies when per-tool use case is not specified.
  * Guides cross-tool comparison and capability matching.
  */
-export type PrimaryUseCase =
-  | 'coding'
-  | 'writing'
-  | 'research'
-  | 'data'
-  | 'mixed'
+export type PrimaryUseCase = 'coding' | 'writing' | 'research' | 'data' | 'mixed'
 
 /**
  * All possible use cases, including tool-specific ones.
  * Per-tool use case overrides primary use case for that tool only.
  */
-export type UseCase =
-  | PrimaryUseCase
-  | 'customer_support'
-  | 'automation'
+export type UseCase = PrimaryUseCase | 'customer_support' | 'automation'
 
 /**
  * Billing model affects recommendation behavior:
@@ -37,18 +29,18 @@ export type ToolInput = {
   /** Per-tool use case. Overrides global use case from AuditInput for cross-tool comparison. */
   useCase: UseCase
   usageFrequency: UsageFrequency
-  
+
   // Subscription/Hybrid: seat-based metrics
   seats?: number
   activeUsers?: number
   utilizationPercent?: number
-  
+
   // API/Hybrid: usage-based metrics (replaces seat model)
-  monthlyTokens?: number      // For token-counting APIs (Claude, GPT)
-  monthlyApiCalls?: number    // For call-counting APIs
+  monthlyTokens?: number // For token-counting APIs (Claude, GPT)
+  monthlyApiCalls?: number // For call-counting APIs
   estimatedWorkloads?: number // Number of parallel/concurrent workloads
-  avgRequestSize?: number     // Avg tokens/request for cost estimation
-  
+  avgRequestSize?: number // Avg tokens/request for cost estimation
+
   // Optional intensity metrics
   avgSessionsPerWeek?: number
   monthlyPromptVolume?: number
@@ -71,7 +63,7 @@ export type ToolAuditResult = {
   currentSpend: number
   recommendedAction: string
   monthlySavings: number
-  savingsPercent?: number  // Relative savings: savings / currentSpend
+  savingsPercent?: number // Relative savings: savings / currentSpend
   reason: string
   pricingWarning?: boolean // True if pricing data is >30 days old
   compatibilityScore?: number

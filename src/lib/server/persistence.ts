@@ -59,7 +59,10 @@ async function ensureDataDir(): Promise<void> {
   try {
     await fs.mkdir(path.dirname(AUDITS_PATH), { recursive: true })
   } catch (error) {
-    console.warn('[PERSISTENCE] Failed to create data directory:', error instanceof Error ? error.message : String(error))
+    console.warn(
+      '[PERSISTENCE] Failed to create data directory:',
+      error instanceof Error ? error.message : String(error),
+    )
   }
 }
 
@@ -95,21 +98,19 @@ export async function saveAuditRecord(audit: FullAudit): Promise<void> {
   if (supabase) {
     try {
       // Save full audit to private audits table
-      const { error: auditError } = await supabase
-        .from('audits')
-        .upsert(
-          {
-            id: audit.id,
-            input: audit.input,
-            results: audit.results,
-            total_monthly_savings: audit.totalMonthlySavings,
-            total_annual_savings: audit.totalAnnualSavings,
-            total_savings_percent: audit.totalSavingsPercent,
-            summary: audit.summary,
-            created_at: audit.createdAt,
-          },
-          { onConflict: 'id' },
-        )
+      const { error: auditError } = await supabase.from('audits').upsert(
+        {
+          id: audit.id,
+          input: audit.input,
+          results: audit.results,
+          total_monthly_savings: audit.totalMonthlySavings,
+          total_annual_savings: audit.totalAnnualSavings,
+          total_savings_percent: audit.totalSavingsPercent,
+          summary: audit.summary,
+          created_at: audit.createdAt,
+        },
+        { onConflict: 'id' },
+      )
 
       if (auditError) {
         console.error('[PERSISTENCE] Supabase audit insert failed:', {
@@ -180,11 +181,7 @@ export async function getAuditRecord(id: string): Promise<FullAudit | null> {
 
   if (supabase) {
     try {
-      const { data, error } = await supabase
-        .from('audits')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
+      const { data, error } = await supabase.from('audits').select('*').eq('id', id).maybeSingle()
 
       if (error) {
         console.error('[PERSISTENCE] Supabase audit fetch failed:', {
@@ -246,18 +243,16 @@ export async function saveLeadRecord(lead: LeadRecord): Promise<void> {
 
   if (supabase) {
     try {
-      const { error } = await supabase
-        .from('leads')
-        .insert({
-          email: lead.email,
-          company_name: lead.companyName,
-          role: lead.role,
-          team_size: lead.teamSize,
-          audit_id: lead.auditId,
-          source: lead.source,
-          honeypot: lead.honeypot,
-          created_at: lead.createdAt ?? new Date().toISOString(),
-        })
+      const { error } = await supabase.from('leads').insert({
+        email: lead.email,
+        company_name: lead.companyName,
+        role: lead.role,
+        team_size: lead.teamSize,
+        audit_id: lead.auditId,
+        source: lead.source,
+        honeypot: lead.honeypot,
+        created_at: lead.createdAt ?? new Date().toISOString(),
+      })
 
       if (error) {
         console.error('[PERSISTENCE] Supabase lead insert failed:', {
