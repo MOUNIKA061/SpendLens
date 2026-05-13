@@ -772,7 +772,7 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
   })
 
   // Store total spend for percentage calculations in caller
-  const resultsWithTotal = finalResults as (typeof finalResults) & { _totalCurrentSpend: number }
+  const resultsWithTotal = finalResults as typeof finalResults & { _totalCurrentSpend: number }
   resultsWithTotal._totalCurrentSpend = totalCurrentSpend
 
   return resultsWithTotal
