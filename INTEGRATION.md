@@ -108,6 +108,31 @@ SpendLens is now a fully integrated production SaaS application with:
 [EMAIL] Email delivery failed: [error details]
 ```
 
+### Email Resilience & Non-Blocking Architecture
+
+**Key Design Principle:** Email failures never break the audit or lead capture flow.
+
+**Workflow:**
+1. User submits lead form
+2. Lead is saved to Supabase/JSON ✅ (must succeed)
+3. Audit is retrieved ✅ (must succeed)
+4. Email is sent (best-effort, failures are tolerated)
+5. User sees success UI regardless of email result
+
+**Failure Scenarios:**
+
+| Issue | Behavior | User Impact | Server Log |
+|-------|----------|-------------|------------|
+| Missing `RESEND_API_KEY` | Skipped | ✅ Success UI | `[EMAIL] RESEND_API_KEY not configured` |
+| Domain unverified | Request fails | ✅ Success UI | `[EMAIL] Resend API error: domain not verified` |
+| Rate limited (429) | Request fails | ✅ Success UI | `[EMAIL] Rate limited by Resend` |
+| Network timeout | Caught, logged | ✅ Success UI | `[EMAIL] Email delivery failed` |
+| Invalid recipient | Request fails | ✅ Success UI | `[EMAIL] Resend API error: invalid email` |
+
+**Production Domain Verification Setup:**
+
+See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) "Transactional Email Configuration" section for step-by-step custom domain setup. No code changes needed when switching from `onboarding@resend.dev` to verified domain.
+
 ### Audit Engine
 
 **File:** `src/lib/auditEngine.ts`  

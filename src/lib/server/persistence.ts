@@ -18,6 +18,7 @@ type LeadRecord = {
 
 const AUDITS_PATH = path.join(process.cwd(), 'data', 'audits.json')
 const LEADS_PATH = path.join(process.cwd(), 'data', 'leads.json')
+const isProductionRuntime = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
 
 let supabaseClient: SupabaseClient | null = null
 let supabaseInitialized = false
@@ -32,7 +33,14 @@ function getSupabaseClient(): SupabaseClient | null {
 
   if (!url || !key) {
     supabaseError = 'SUPABASE_URL or SUPABASE_*_KEY not configured'
-    console.warn('[PERSISTENCE] Supabase not configured, using JSON fallback')
+    if (isProductionRuntime) {
+      console.error('[PERSISTENCE] Supabase not configured in production', {
+        urlConfigured: Boolean(url),
+        keyConfigured: Boolean(key),
+      })
+    } else {
+      console.warn('[PERSISTENCE] Supabase not configured, using JSON fallback')
+    }
     return null
   }
 
@@ -144,6 +152,14 @@ export async function saveAuditRecord(audit: FullAudit): Promise<void> {
     }
   }
 
+  if (isProductionRuntime) {
+    console.error('[PERSISTENCE] JSON fallback disabled in production', {
+      auditId: audit.id,
+      reason: supabaseError ?? 'Supabase unavailable',
+    })
+    throw new Error(`Supabase persistence is not configured: ${supabaseError ?? 'unknown error'}`)
+  }
+
   // JSON fallback
   try {
     const audits = await readJsonFile<Record<string, FullAudit>>(AUDITS_PATH, {})
@@ -198,6 +214,14 @@ export async function getAuditRecord(id: string): Promise<FullAudit | null> {
         error: error instanceof Error ? error.message : String(error),
       })
     }
+  }
+
+  if (isProductionRuntime) {
+    console.error('[PERSISTENCE] JSON fallback disabled in production for fetch', {
+      auditId: id,
+      reason: supabaseError ?? 'Supabase unavailable',
+    })
+    return null
   }
 
   // JSON fallback
@@ -256,6 +280,14 @@ export async function saveLeadRecord(lead: LeadRecord): Promise<void> {
     }
   }
 
+  if (isProductionRuntime) {
+    console.error('[PERSISTENCE] JSON fallback disabled in production for lead save', {
+      email: lead.email,
+      reason: supabaseError ?? 'Supabase unavailable',
+    })
+    throw new Error(`Supabase persistence is not configured: ${supabaseError ?? 'unknown error'}`)
+  }
+
   // JSON fallback
   try {
     const leads = await readJsonFile<LeadRecord[]>(LEADS_PATH, [])
@@ -290,6 +322,14 @@ export async function deleteAuditRecord(id: string): Promise<void> {
         error: error instanceof Error ? error.message : String(error),
       })
     }
+  }
+
+  if (isProductionRuntime) {
+    console.error('[PERSISTENCE] JSON fallback disabled in production for delete', {
+      auditId: id,
+      reason: supabaseError ?? 'Supabase unavailable',
+    })
+    throw new Error(`Supabase persistence is not configured: ${supabaseError ?? 'unknown error'}`)
   }
 
   // JSON fallback

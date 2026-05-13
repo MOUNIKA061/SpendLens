@@ -1,1 +1,99 @@
-{}
+{
+  "2778edaf-5f65-414b-9be5-d8d3e96c5f5c": {
+    "id": "2778edaf-5f65-414b-9be5-d8d3e96c5f5c",
+    "input": {
+      "tools": [
+        {
+          "toolId": "cursor",
+          "plan": "hobby",
+          "monthlySpend": 0,
+          "billingType": "subscription",
+          "useCase": "mixed",
+          "usageFrequency": "daily",
+          "seats": 1
+        }
+      ],
+      "teamSize": 5,
+      "useCase": "mixed"
+    },
+    "results": [
+      {
+        "toolId": "cursor",
+        "toolName": "Cursor",
+        "currentSpend": 0,
+        "recommendedAction": "Upgrade to a team plan or add seats",
+        "monthlySavings": 0,
+        "savingsPercent": 0,
+        "reason": "You have 5 people but only 1 individual license. Consider upgrading to a team plan or adding seats.",
+        "pricingWarning": false,
+        "confidence": "medium",
+        "priority": "medium",
+        "riskLevel": "low"
+      }
+    ],
+    "totalMonthlySavings": 0,
+    "totalAnnualSavings": 0,
+    "totalSavingsPercent": 0,
+    "summary": "Your current AI stack appears well optimized for a 5-person team focused on mixed. SpendLens did not find meaningful monthly savings, which suggests your current tool mix is already reasonably efficient.",
+    "createdAt": "2026-05-13T05:45:22.667Z"
+  },
+  "ef321746-41fe-42e5-bfee-e009354f8e38": {
+    "id": "ef321746-41fe-42e5-bfee-e009354f8e38",
+    "input": {
+      "tools": [
+        {
+          "toolId": "anthropic_api",
+          "plan": "usage",
+          "monthlySpend": 400,
+          "billingType": "api",
+          "useCase": "mixed",
+          "usageFrequency": "weekly"
+        },
+        {
+          "toolId": "github_copilot",
+          "plan": "business",
+          "monthlySpend": 100,
+          "billingType": "subscription",
+          "useCase": "mixed",
+          "usageFrequency": "occasionally",
+          "seats": 3
+        }
+      ],
+      "teamSize": 5,
+      "useCase": "mixed"
+    },
+    "results": [
+      {
+        "toolId": "anthropic_api",
+        "toolName": "Anthropic API",
+        "currentSpend": 400,
+        "recommendedAction": "Consider switching to Claude Pro",
+        "monthlySavings": 380,
+        "savingsPercent": 95,
+        "reason": "Your API spend is $400/mo. A Claude Pro subscription costs $20/mo — if your usage patterns fit a flat subscription, switching would save $380/mo.",
+        "pricingWarning": false,
+        "confidence": "high",
+        "priority": "high",
+        "riskLevel": "low"
+      },
+      {
+        "toolId": "github_copilot",
+        "toolName": "GitHub Copilot",
+        "currentSpend": 100,
+        "recommendedAction": "Purchase GitHub Copilot credits through Credex",
+        "monthlySavings": 15,
+        "savingsPercent": 15,
+        "reason": "You're paying $100/mo at retail. Credex sources discounted AI credits - a ~15% discount would save approximately $15/mo ($180/yr) on this tool alone.",
+        "pricingWarning": false,
+        "confidence": "medium",
+        "priority": "low",
+        "riskLevel": "low"
+      }
+    ],
+    "totalMonthlySavings": 395,
+    "totalAnnualSavings": 4740,
+    "totalSavingsPercent": 79,
+    "summary": "SpendLens found approximately $395/month in potential savings and $4740/year overall. The largest opportunity is Anthropic API, where Your API spend is $400/mo. A Claude Pro subscription costs $20/mo — if your usage patterns fit a flat subscription, switching would save $380/mo.",
+    "createdAt": "2026-05-13T05:48:51.364Z"
+  }
+}
