@@ -136,7 +136,7 @@ AI summary as pure prose context.
 
 ### ❌ Attempt 3 — Asking Gemini to also generate the recommendation
 
-Early design had Gemini generate both the summary *and* the recommendation
+Early design had Gemini generate both the summary _and_ the recommendation
 action for each tool. Prompt:
 
 ```
@@ -183,22 +183,22 @@ This means users always get a complete audit report even if the Gemini API
 is down. The fallback was designed to be indistinguishable in quality from
 a real Gemini response for straightforward audits.
 
-| Failure Mode | Log Message | Response |
-|---|---|---|
-| Missing `GEMINI_API_KEY` | `"GEMINI_API_KEY not set, using fallback summary"` | Fallback |
-| Rate limited (429) | `"Rate limited, returning fallback summary"` | Fallback immediately, no retry |
-| API error / timeout | Error message logged | Fallback |
-| Empty response | `"Gemini returned empty response, using fallback summary"` | Fallback |
+| Failure Mode             | Log Message                                                | Response                       |
+| ------------------------ | ---------------------------------------------------------- | ------------------------------ |
+| Missing `GEMINI_API_KEY` | `"GEMINI_API_KEY not set, using fallback summary"`         | Fallback                       |
+| Rate limited (429)       | `"Rate limited, returning fallback summary"`               | Fallback immediately, no retry |
+| API error / timeout      | Error message logged                                       | Fallback                       |
+| Empty response           | `"Gemini returned empty response, using fallback summary"` | Fallback                       |
 
 ---
 
 ## Anti-Hallucination Summary
 
-| Risk | Mitigation |
-|---|---|
-| Invented savings figures | Grounding instruction in both system + user prompt |
-| Wrong tool names | Pass full JSON; model reads names from data, doesn't generate them |
-| Markdown in email body | Explicit format prohibition in system instruction |
-| AI self-reference | Explicit prohibition in system instruction |
-| Irrelevant Credex mention | Conditional $500/mo threshold in user prompt |
-| Approximate numbers | Deterministic engine calculates all figures; Gemini only narrates |
+| Risk                      | Mitigation                                                         |
+| ------------------------- | ------------------------------------------------------------------ |
+| Invented savings figures  | Grounding instruction in both system + user prompt                 |
+| Wrong tool names          | Pass full JSON; model reads names from data, doesn't generate them |
+| Markdown in email body    | Explicit format prohibition in system instruction                  |
+| AI self-reference         | Explicit prohibition in system instruction                         |
+| Irrelevant Credex mention | Conditional $500/mo threshold in user prompt                       |
+| Approximate numbers       | Deterministic engine calculates all figures; Gemini only narrates  |

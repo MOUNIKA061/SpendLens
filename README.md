@@ -2,12 +2,12 @@
 
 **SpendLens** is an AI-powered spend auditing web app that helps startup founders identify wasteful, redundant, or overpriced AI tool subscriptions in minutes. You enter your current AI tool stack, and SpendLens runs a defensible audit across four check types — right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription comparisons — then emails you a personalized savings report.
 
-
 ---
 
 ## 🖥️ Screenshots / Demo
 
 > **Add 3 screenshots here** (drag & drop into GitHub):
+>
 > 1. SpendForm — tool entry with billing type, use case, usage frequency fields
 > 2. Audit Results — monthly/annual savings dashboard + top 3 recommendations
 > 3. Confirmation email with savings breakdown
@@ -95,16 +95,16 @@ Add all `.env.local` variables under **Vercel → Settings → Environment Varia
 
 ## 🏗️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
-| AI | Google Gemini (AI Studio API) |
-| Email | Resend |
-| Database | Supabase (PostgreSQL) |
-| Testing | Vitest |
-| Deployment | Vercel |
+| Layer      | Technology                         |
+| ---------- | ---------------------------------- |
+| Framework  | Next.js 16 (App Router, Turbopack) |
+| Language   | TypeScript                         |
+| Styling    | Tailwind CSS v4                    |
+| AI         | Google Gemini (AI Studio API)      |
+| Email      | Resend                             |
+| Database   | Supabase (PostgreSQL)              |
+| Testing    | Vitest                             |
+| Deployment | Vercel                             |
 
 ---
 
@@ -129,6 +129,7 @@ src/
 ```
 
 **Data flow:**
+
 1. User fills SpendForm → submits tool stack with billing/usage metadata
 2. `/api/leads` captures lead, runs `auditTools()`, persists to Supabase
 3. Results rendered at `/results/[id]` with shareable link
@@ -140,12 +141,12 @@ src/
 
 The core `auditTools()` function in `auditEngine.ts` runs **4 checks per tool**, picks the best candidate by score, and returns ranked results:
 
-| Check | When it runs | What it finds |
-|---|---|---|
-| **Right-sizing** | `subscription` / `hybrid` billing | Cheaper plan within same vendor |
-| **Cross-tool alternative** | `subscription` / `hybrid` billing | Compatible cheaper tool for your use case |
-| **API vs. subscription** | `subscription` billing, Claude/ChatGPT | Whether pay-per-use would be cheaper |
-| **API cost-benefit** | `api` / `hybrid` billing | Whether a flat subscription would be cheaper |
+| Check                      | When it runs                           | What it finds                                |
+| -------------------------- | -------------------------------------- | -------------------------------------------- |
+| **Right-sizing**           | `subscription` / `hybrid` billing      | Cheaper plan within same vendor              |
+| **Cross-tool alternative** | `subscription` / `hybrid` billing      | Compatible cheaper tool for your use case    |
+| **API vs. subscription**   | `subscription` billing, Claude/ChatGPT | Whether pay-per-use would be cheaper         |
+| **API cost-benefit**       | `api` / `hybrid` billing               | Whether a flat subscription would be cheaper |
 
 Underutilized seats (< 50% active users) are flagged as **critical priority** before any of the above — unused licenses are pure waste with zero switching risk.
 
@@ -156,21 +157,26 @@ Capability compatibility uses **dynamic per-use-case weightings** — e.g. `codi
 ## ⚖️ Decisions — 5 Trade-offs & Why
 
 ### 1. Non-blocking email delivery
+
 **Decision:** Email failures never interrupt the audit. Leads and audits are persisted to Supabase first; email is fire-and-forget with full error logging.  
 **Why:** A Resend quota limit or unverified domain shouldn't mean users lose their results. The core value — audit + results page — always works regardless of email status.
 
 ### 2. Four separate check functions over one black-box scorer
+
 **Decision:** Named check functions (`checkRightSize`, `checkCrossToolAlternative`, `checkApiVsSubscription`, `compareApiBillingToSubscription`) rather than a single scoring model.  
 **Why:** Each check has different logic, inputs, and confidence levels. Keeping them separate makes recommendations auditable, testable, and easy to extend — a reviewer can trace exactly why a recommendation was made.
 
 ### 3. Dynamic capability weighting per use case
+
 **Decision:** Compatibility scores use different weights depending on whether the use case is `coding`, `research`, `data`, `writing`, etc.  
 **Why:** A tool that scores 90% for writing might score 60% for coding. A single global weight would generate misleading compatibility scores and bad recommendations. The added complexity is justified by accuracy.
 
 ### 4. Billing type as a first-class input field
+
 **Decision:** Every tool entry has an explicit `billingType` (`subscription` / `api` / `hybrid`) which gates which checks run.  
 **Why:** Seat-based and usage-based tools need fundamentally different optimization strategies. Applying seat-count logic to an API tool produces nonsensical recommendations. Explicit billing type prevents this at the data layer.
 
 ### 5. Google Gemini (AI Studio) for the AI summary
+
 **Decision:** AI-generated audit summaries use Google Gemini via the AI Studio API rather than OpenAI or Anthropic.  
 **Why:** Google AI Studio's free tier is generous for demo-scale usage with no credit card required. For a hard-deadline internship project, unblocking development immediately mattered more than provider preference. The call is isolated to one function — swapping providers later is a one-line change.

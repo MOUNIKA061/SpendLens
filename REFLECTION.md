@@ -22,7 +22,7 @@ The fix was waiting for the daily quota to reset at midnight UTC and testing wit
 
 ## 2. A Decision I Reversed Mid-Week
 
-I originally designed the audit engine to use Gemini for both the AI summary *and* the per-tool recommendations. The idea was that an LLM would produce more natural, nuanced recommendations than a rule-based system — it could say things like "given that your team uses Cursor primarily for solo coding sessions, the Business plan's collaboration features aren't adding value."
+I originally designed the audit engine to use Gemini for both the AI summary _and_ the per-tool recommendations. The idea was that an LLM would produce more natural, nuanced recommendations than a rule-based system — it could say things like "given that your team uses Cursor primarily for solo coding sessions, the Business plan's collaboration features aren't adding value."
 
 I built the first version this way. Gemini would receive the tool stack and return a JSON array of recommendations with actions, savings estimates, and reasons. It worked well on the first few test cases.
 

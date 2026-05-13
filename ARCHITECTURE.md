@@ -123,16 +123,16 @@ flowchart TD
 
 ## Why This Stack
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| **Framework** | Next.js 16 App Router | Single repo for frontend + API routes. No separate backend needed for a form → audit → email flow. Turbopack makes dev fast. |
-| **Language** | TypeScript | The audit engine has complex nested types (`AuditInput`, `ToolAuditResult`, `BillingType`). TypeScript caught several logic errors at compile time that would have been silent bugs in JS. |
-| **AI summary** | Google Gemini (AI Studio) | Generous free tier, no credit card required for dev. The summary call is isolated to one function — swapping providers is a one-line change. |
-| **Email** | Resend | Clean SDK, good deliverability, free tier covers demo usage. Non-blocking architecture means quota exhaustion never breaks the core audit flow. |
-| **Database** | Supabase | Managed Postgres with a generous free tier. Row-level security and auto-generated REST API mean zero backend boilerplate for lead + audit persistence. |
-| **Styling** | Tailwind CSS v4 | Fast iteration on form and results UI without context-switching to a separate stylesheet. |
-| **Testing** | Vitest | Zero-config with Next.js + TypeScript. Fast enough to run in CI without a separate test server. |
-| **Deployment** | Vercel | First-class Next.js support, environment variable management, preview deploys per PR. |
+| Decision       | Choice                    | Rationale                                                                                                                                                                                  |
+| -------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Framework**  | Next.js 16 App Router     | Single repo for frontend + API routes. No separate backend needed for a form → audit → email flow. Turbopack makes dev fast.                                                               |
+| **Language**   | TypeScript                | The audit engine has complex nested types (`AuditInput`, `ToolAuditResult`, `BillingType`). TypeScript caught several logic errors at compile time that would have been silent bugs in JS. |
+| **AI summary** | Google Gemini (AI Studio) | Generous free tier, no credit card required for dev. The summary call is isolated to one function — swapping providers is a one-line change.                                               |
+| **Email**      | Resend                    | Clean SDK, good deliverability, free tier covers demo usage. Non-blocking architecture means quota exhaustion never breaks the core audit flow.                                            |
+| **Database**   | Supabase                  | Managed Postgres with a generous free tier. Row-level security and auto-generated REST API mean zero backend boilerplate for lead + audit persistence.                                     |
+| **Styling**    | Tailwind CSS v4           | Fast iteration on form and results UI without context-switching to a separate stylesheet.                                                                                                  |
+| **Testing**    | Vitest                    | Zero-config with Next.js + TypeScript. Fast enough to run in CI without a separate test server.                                                                                            |
+| **Deployment** | Vercel                    | First-class Next.js support, environment variable management, preview deploys per PR.                                                                                                      |
 
 ---
 

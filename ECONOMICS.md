@@ -15,10 +15,11 @@ purchases discounted AI credits through Credex.
 **Reasoning the LTV:**
 
 Assume the average SpendLens user who triggers the Credex callout (savings
+
 > $500/month) is spending ~$800/month on AI tools. The audit identifies
-~$300/month in potential savings. Credex offers a 15% discount on AI credits
-via procurement — so on $800/month of spend, Credex can save the founder
-$120/month.
+> ~$300/month in potential savings. Credex offers a 15% discount on AI credits
+> via procurement — so on $800/month of spend, Credex can save the founder
+> $120/month.
 
 If Credex takes a margin of ~20% on credits purchased through them:
 

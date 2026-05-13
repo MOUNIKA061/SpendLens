@@ -38,6 +38,15 @@ export function AuditResults({ auditId }: { auditId: string }) {
     let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     const tryLoad = async (attempt = 0) => {
+      const cached = getAudit(auditId)
+      if (cached) {
+        if (!cancelled) {
+          setAudit(cached)
+          setIsReady(true)
+        }
+        return
+      }
+
       try {
         const res = await fetch(`/api/audits/${auditId}`)
         if (res.ok) {
@@ -50,15 +59,6 @@ export function AuditResults({ auditId }: { auditId: string }) {
         }
       } catch (error) {
         console.error('fetch audit', error)
-      }
-
-      const cached = getAudit(auditId)
-      if (cached) {
-        if (!cancelled) {
-          setAudit(cached)
-          setIsReady(true)
-        }
-        return
       }
 
       if (attempt < 4) {
@@ -120,7 +120,8 @@ export function AuditResults({ auditId }: { auditId: string }) {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-white">Audit not found</h1>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              This audit isn&apos;t saved locally. Run a new audit or wait for the results page to load.
+              This audit isn&apos;t saved locally. Run a new audit or wait for the results page to
+              load.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link

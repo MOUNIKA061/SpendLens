@@ -15,6 +15,7 @@ It is a high-intent B2B and B2C lead-generation tool designed to capture startup
 ### Definition
 
 The percentage of completed audits that:
+
 - Generate meaningful savings opportunities
 - Capture contact information
 - Result in a high-intent lead for Credex
@@ -23,3 +24,4 @@ Formula:
 
 ```text
 Qualified Audit Completions / Total Audit Starts
+```

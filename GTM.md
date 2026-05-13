@@ -30,26 +30,31 @@ The trigger moment is almost always a monthly credit card statement review or a 
 ## Where They Hang Out Online
 
 **Reddit:**
+
 - r/SaaS (280k members) — monthly threads on tool stacks and costs
 - r/startups — "how much are you spending on AI" posts get hundreds of comments
 - r/ExperiencedDevs — skeptical, high-signal audience who would actually engage critically
 
 **Hacker News:**
+
 - "Ask HN: What's your AI tool stack and what does it cost?" threads
 - Show HN submissions — this audience is the exact user and they vote on things that save them money
 
 **Slack communities:**
+
 - Indie Hackers Slack — #tools channel
 - Ramen Club (YC founders) — active discussion of burn and tooling
 - Online Geniuses — SaaS operators, $0 to join
 
 **Discord:**
+
 - Buildspace Discord — active founders building with AI
 - Levels.io community — indie hackers, cost-conscious by default
 
 **X (Twitter):**
+
 - The "AI tools" list maintained by followers of @levelsio, @marc_louvion, @dvassallo
-- Replies to any tweet from @sama, @alexalbert__ (Anthropic), or @cursor_ai about pricing changes — these threads have thousands of impressions from exactly this audience
+- Replies to any tweet from @sama, @alexalbert\_\_ (Anthropic), or @cursor_ai about pricing changes — these threads have thousands of impressions from exactly this audience
 
 ---
 

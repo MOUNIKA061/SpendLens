@@ -10,6 +10,7 @@
 # Interview 1 — Early-Stage SaaS Founder
 
 ## Interviewee
+
 - Name / Initials: [Replace]
 - Role: Founder / CTO
 - Company Stage: Pre-seed SaaS startup
@@ -54,6 +55,7 @@ This conversation changed the product from a generic cost calculator into a reco
 Originally, the product mainly showed pricing comparisons.
 
 After this interview, I added:
+
 - Per-tool optimization recommendations
 - Clear downgrade suggestions
 - Duplicate tooling detection
@@ -66,6 +68,7 @@ I also prioritized the "current spend → optimized spend → savings" compariso
 # Interview 2 — Indie Hacker / Solo Builder
 
 ## Interviewee
+
 - Name / Initials: [Replace]
 - Role: Indie Hacker / Solo Founder
 - Company Stage: Bootstrapped side project
@@ -109,6 +112,7 @@ I realized SpendLens should not always try to maximize savings. In some cases, t
 ## What Changed in My Product Design
 
 This interview directly influenced:
+
 - Honest low-savings messaging
 - "You're already optimized" result states
 - Reduced pressure-oriented CTAs
@@ -123,6 +127,7 @@ The product became more focused on optimization confidence rather than extreme c
 # Interview 3 — Engineering Manager at Small Startup
 
 ## Interviewee
+
 - Name / Initials: [Replace]
 - Role: Engineering Manager
 - Company Stage: Seed / Series A startup
@@ -165,11 +170,13 @@ optimization recommendations must feel practical and low-friction, not purely fi
 ## What Changed in My Product Design
 
 After this conversation, I improved the recommendation system to prioritize:
+
 - Minimal workflow disruption
 - Same-vendor downgrade recommendations first
 - Usage-fit explanations instead of blanket replacements
 
 I also added:
+
 - Team-size-aware recommendations
 - More nuanced messaging around switching tools
 - Stronger reasoning sections inside audit cards
@@ -190,6 +197,7 @@ Across all three interviews, several consistent themes appeared:
 - Honest audits create more credibility than exaggerated savings claims
 
 These interviews significantly shaped SpendLens into a product focused on:
+
 - Explainable optimization
 - Practical recommendations
 - Transparent savings calculations
