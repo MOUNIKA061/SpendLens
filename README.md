@@ -1,182 +1,164 @@
-# 🎯 SpendLens — AI Spend Audit for Founders, Teams, and Individuals
+# SpendLens
 
-**SpendLens** is an AI-powered spend auditing web app that helps founders, teams, and individuals identify wasteful, redundant, or overpriced AI tool subscriptions in minutes. You enter your current AI tool stack, and SpendLens runs a defensible audit across four check types — right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription comparisons — then emails you a personalized savings report.
+**SpendLens** is a free AI spend audit web app for founders, teams, and individuals who want a fast second opinion on their AI tool stack. It helps users identify wasteful subscriptions, right-size plans, compare alternatives, and share a clear results page with a public link.
 
----
-
-## 🖥️ Screenshots / Demo
-
-> **Screenshots / Demo:**
->
-> - SpendForm — tool entry with billing type, use case, usage frequency fields
-> - Audit Results — monthly/annual savings dashboard + top 3 recommendations
-> - Confirmation email with savings breakdown
->
-> 🎥 **Demo Recording:** Not included in this repository snapshot
-
-## ✨ What It Does
-
-- **Multi-step spend form** — enter your AI tools, billing type (`subscription` / `api` / `hybrid`), use case, team size, and usage frequency
-- **4-check audit engine** — runs right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription analysis per tool
-- **Capability compatibility scoring** — uses dynamic per-use-case weightings to ensure alternatives are fit for purpose before recommending them
-- **Underutilization detection** — flags unused seats and licenses as the highest-priority savings
-- **AI-generated summary** — powered by Google Gemini (AI Studio API)
-- **Shareable results page** — persistent audit at `/results/[id]`
-- **Audit confirmation email** — sent via Resend with full savings breakdown
-- **Supabase persistence** — leads and audits stored in PostgreSQL
+**Live app:** https://spend-lens-tawny.vercel.app
 
 ---
 
-## 🚀 Quick Start
+## What It Does
+
+- Multi-step spend form for AI tools, plans, monthly spend, seats, team size, and use case
+- Rules-based audit engine that evaluates right-sizing, cross-tool alternatives, credits, and API vs. subscription fit
+- Instant results page with monthly savings, annual savings, and top recommendations
+- Email capture after value is shown, never before
+- Shareable public audit URLs with Open Graph previews
+- Resilient lead storage and confirmation email delivery
+
+---
+
+## Screenshots / Demo
+
+> Add 3 screenshots here or link a short demo video.
+>
+> - Spend form
+> - Audit results page
+> - Confirmation email
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+
-- [Resend](https://resend.com) account (free tier works for dev)
-- [Supabase](https://supabase.com) project
-- [Google AI Studio](https://aistudio.google.com) API key (Gemini)
+- Resend account
+- Supabase project
+- Google AI Studio API key
 
-### Install & Run Locally
+### Install
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/MOUNIKA061/SpendLens.git
 cd SpendLens
-
-# 2. Install dependencies
 npm install
+```
 
-# 3. Set up environment variables
-cp .env.example .env.local
-# Fill in values (see below)
+### Run locally
 
-# 4. Run the dev server
+```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Environment Variables
+### Environment variables
 
 ```env
-# AI — Google Gemini (AI Studio)
 GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_key
-
-# Email — Resend
 RESEND_API_KEY=re_xxxxxxxxxxxx
 RESEND_FROM_EMAIL=SpendLens <onboarding@resend.dev>
-
-# Database — Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-> ⚠️ `onboarding@resend.dev` only delivers to your own Resend signup email. To send to anyone, verify a custom domain at [resend.com/domains](https://resend.com/domains) and update `RESEND_FROM_EMAIL`.
-
-### Run Tests
+### Test
 
 ```bash
 npm test
 ```
 
-### Deploy to Vercel
+### Build
+
+```bash
+npm run build
+```
+
+### Deploy
 
 ```bash
 npm i -g vercel
 vercel --prod
 ```
 
-Add all `.env.local` variables under **Vercel → Settings → Environment Variables**.
-
-**🌐 Deployed URL:** https://spend-lens-tawny.vercel.app
+Add the same environment variables in your deployment platform.
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
-| Layer      | Technology                         |
-| ---------- | ---------------------------------- |
-| Framework  | Next.js 16 (App Router, Turbopack) |
-| Language   | TypeScript                         |
-| Styling    | Tailwind CSS v4                    |
-| AI         | Google Gemini (AI Studio API)      |
-| Email      | Resend                             |
-| Database   | Supabase (PostgreSQL)              |
-| Testing    | Vitest                             |
-| Deployment | Vercel                             |
+| Layer      | Technology                    |
+| ---------- | ----------------------------- |
+| Framework  | Next.js 16 App Router         |
+| Language   | TypeScript                    |
+| Styling    | Tailwind CSS v4               |
+| AI Summary | Google Gemini (AI Studio API) |
+| Email      | Resend                        |
+| Database   | Supabase (PostgreSQL)         |
+| Testing    | Vitest                        |
+| Deployment | Vercel                        |
 
 ---
 
-## 🧠 Architecture
+## Architecture
 
-```
+### High-level flow
+
+1. A user lands on the home page and opens the audit form.
+2. They enter tool, plan, spend, seat, and use-case details.
+3. The API runs the audit engine and generates a summary.
+4. Results are stored and rendered at a public shareable URL.
+5. A confirmation email is sent after the user sees value.
+
+### Project structure
+
+```text
 src/
 ├── app/
 │   ├── api/
-│   │   ├── audits/[id]/     → Fetch saved audit by ID
-│   │   ├── leads/           → Capture lead + run audit + send email
-│   │   └── og/[id]/         → OG image generation for social sharing
-│   └── results/[id]/        → Shareable audit results page
+│   │   ├── audits/[id]/
+│   │   ├── leads/
+│   │   └── og/[id]/
+│   └── results/[id]/
 ├── components/
-│   ├── SpendForm.tsx         → Multi-step form (tool entry)
-│   └── AuditResults.tsx      → Results dashboard
+│   ├── SpendForm.tsx
+│   └── AuditResults.tsx
 └── lib/
-    ├── auditEngine.ts        → Core 4-check savings logic
-    ├── pricingData.ts        → Tool pricing + capability definitions
+    ├── auditEngine.ts
+    ├── pricingData.ts
     └── server/
-        └── email.ts          → Resend email delivery (non-blocking)
+        └── email.ts
 ```
 
-**Data flow:**
-
-1. User fills SpendForm → submits tool stack with billing/usage metadata
-2. `/api/leads` captures lead, runs `auditTools()`, persists to Supabase
-3. Results rendered at `/results/[id]` with shareable link
-4. Confirmation email sent via Resend (non-blocking — never interrupts audit flow)
-
 ---
 
-## ⚙️ Audit Engine — How It Works
-
-The core `auditTools()` function in `auditEngine.ts` runs **4 checks per tool**, picks the best candidate by score, and returns ranked results:
-
-| Check                      | When it runs                           | What it finds                                |
-| -------------------------- | -------------------------------------- | -------------------------------------------- |
-| **Right-sizing**           | `subscription` / `hybrid` billing      | Cheaper plan within same vendor              |
-| **Cross-tool alternative** | `subscription` / `hybrid` billing      | Compatible cheaper tool for your use case    |
-| **API vs. subscription**   | `subscription` billing, Claude/ChatGPT | Whether pay-per-use would be cheaper         |
-| **API cost-benefit**       | `api` / `hybrid` billing               | Whether a flat subscription would be cheaper |
-
-Underutilized seats (< 50% active users) are flagged as **critical priority** before any of the above — unused licenses are pure waste with zero switching risk.
-
-Capability compatibility uses **dynamic per-use-case weightings** — e.g. `coding` heavily weights `agentEditing` and `codingDepth`, while `research` weights `longContextSupport` and `dataAnalysisStrength`. Alternatives below 75% compatibility are filtered out.
-
----
-
-## ⚖️ Decisions — 5 Trade-offs & Why
+## Decisions
 
 ### 1. Non-blocking email delivery
 
-**Decision:** Email failures never interrupt the audit. Leads and audits are persisted to Supabase first; email is fire-and-forget with full error logging.  
-**Why:** A Resend quota limit or unverified domain shouldn't mean users lose their results. The core value — audit + results page — always works regardless of email status.
+Email failures never block the audit flow. The core product value is the audit result, so email is best-effort.
 
-### 2. Four separate check functions over one black-box scorer
+### 2. Separate recommendation checks
 
-**Decision:** Named check functions (`checkRightSize`, `checkCrossToolAlternative`, `checkApiVsSubscription`, `compareApiBillingToSubscription`) rather than a single scoring model.  
-**Why:** Each check has different logic, inputs, and confidence levels. Keeping them separate makes recommendations auditable, testable, and easy to extend — a reviewer can trace exactly why a recommendation was made.
+The engine uses named checks instead of one opaque score so the reasoning stays auditable and easy to debug.
 
-### 3. Dynamic capability weighting per use case
+### 3. Dynamic capability weighting
 
-**Decision:** Compatibility scores use different weights depending on whether the use case is `coding`, `research`, `data`, `writing`, etc.  
-**Why:** A tool that scores 90% for writing might score 60% for coding. A single global weight would generate misleading compatibility scores and bad recommendations. The added complexity is justified by accuracy.
+Different use cases value different capabilities. A single global score would produce misleading recommendations.
 
-### 4. Billing type as a first-class input field
+### 4. Billing type as a first-class field
 
-**Decision:** Every tool entry has an explicit `billingType` (`subscription` / `api` / `hybrid`) which gates which checks run.  
-**Why:** Seat-based and usage-based tools need fundamentally different optimization strategies. Applying seat-count logic to an API tool produces nonsensical recommendations. Explicit billing type prevents this at the data layer.
+Subscription, API, and hybrid tools need different optimization logic, so billing type controls which checks run.
 
-### 5. Google Gemini (AI Studio) for the AI summary
+### 5. Gemini only for the summary
 
-**Decision:** AI-generated audit summaries use Google Gemini via the AI Studio API rather than OpenAI or Anthropic.  
-**Why:** Google AI Studio's free tier is generous for demo-scale usage with no credit card required. For a hard-deadline internship project, unblocking development immediately mattered more than provider preference. The call is isolated to one function — swapping providers later is a one-line change.
+The audit math is rule-based. AI is used only for the human-readable summary, which keeps the core logic deterministic.
+
+---
+
+## Notes
+
+- Pricing data is documented in [PRICING_DATA.md](PRICING_DATA.md).
+- The audit engine has dedicated tests in [src/lib/auditEngine.test.ts](src/lib/auditEngine.test.ts).
+- The app is designed for founders, teams, and individuals, not just startup companies.
