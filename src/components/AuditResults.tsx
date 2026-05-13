@@ -120,7 +120,7 @@ export function AuditResults({ auditId }: { auditId: string }) {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-white">Audit not found</h1>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              This audit isn't saved locally. Run a new audit or wait for the results page to load.
+              This audit isn&apos;t saved locally. Run a new audit or wait for the results page to load.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link

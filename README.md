@@ -1,65 +1,176 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎯 SpendLens — AI Spend Audit for Startup Founders
 
-## Getting Started
+**SpendLens** is an AI-powered spend auditing web app that helps startup founders identify wasteful, redundant, or overpriced AI tool subscriptions in minutes. You enter your current AI tool stack, and SpendLens runs a defensible audit across four check types — right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription comparisons — then emails you a personalized savings report.
 
-First, run the development server:
+
+---
+
+## 🖥️ Screenshots / Demo
+
+> **Add 3 screenshots here** (drag & drop into GitHub):
+> 1. SpendForm — tool entry with billing type, use case, usage frequency fields
+> 2. Audit Results — monthly/annual savings dashboard + top 3 recommendations
+> 3. Confirmation email with savings breakdown
+>
+> 🎥 **Demo Recording:** _[Add your Loom or YouTube link here]_
+
+## ✨ What It Does
+
+- **Multi-step spend form** — enter your AI tools, billing type (`subscription` / `api` / `hybrid`), use case, team size, and usage frequency
+- **4-check audit engine** — runs right-sizing, cross-tool alternatives, Credex credits, and API vs. subscription analysis per tool
+- **Capability compatibility scoring** — uses dynamic per-use-case weightings to ensure alternatives are fit for purpose before recommending them
+- **Underutilization detection** — flags unused seats and licenses as the highest-priority savings
+- **AI-generated summary** — powered by Google Gemini (AI Studio API)
+- **Shareable results page** — persistent audit at `/results/[id]`
+- **Audit confirmation email** — sent via Resend with full savings breakdown
+- **Supabase persistence** — leads and audits stored in PostgreSQL
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- [Resend](https://resend.com) account (free tier works for dev)
+- [Supabase](https://supabase.com) project
+- [Google AI Studio](https://aistudio.google.com) API key (Gemini)
+
+### Install & Run Locally
 
 ```bash
+# 1. Clone the repo
+git clone https://github.com/MOUNIKA061/SpendLens.git
+cd SpendLens
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+cp .env.example .env.local
+# Fill in values (see below)
+
+# 4. Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# AI — Google Gemini (AI Studio)
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_key
 
-## Learn More
+# Email — Resend
+RESEND_API_KEY=re_xxxxxxxxxxxx
+RESEND_FROM_EMAIL=SpendLens <onboarding@resend.dev>
 
-To learn more about Next.js, take a look at the following resources:
+# Database — Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> ⚠️ `onboarding@resend.dev` only delivers to your own Resend signup email. To send to anyone, verify a custom domain at [resend.com/domains](https://resend.com/domains) and update `RESEND_FROM_EMAIL`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Phase 1 Master Checklist (Verification)
-
-Use this checklist before shipping updates:
-
-- Product direction finalized: name, positioning, target user, pricing/audit strategy
-- Engineering setup complete: Next.js + TypeScript + Tailwind + ESLint + Prettier
-- CI active: lint, format check, and build on pull requests
-- Backend integrated: Supabase schema, API routes, Resend email, rate limiting/honeypot
-- Environments configured: `SUPABASE_*`, `GEMINI_API_KEY`, `RESEND_*`
-
-## Local Validation
-
-Run these commands before pushing:
+### Run Tests
 
 ```bash
-npm run format:check
-npm run lint
-npm run build
+npm test
 ```
 
-## Deployment Verification
+### Deploy to Vercel
 
-After connecting GitHub to Vercel:
+```bash
+npm i -g vercel
+vercel --prod
+```
 
-1. Confirm all required environment variables are set in Vercel project settings.
-2. Open a pull request and verify GitHub Actions CI passes.
-3. Merge to `main` and verify Vercel production deployment succeeds.
-4. Smoke test these routes: `/`, `/audit`, `/results/[id]`, `/api/leads`, `/api/audit`.
+Add all `.env.local` variables under **Vercel → Settings → Environment Variables**.
+
+**🌐 Deployed URL:** _[Add your Vercel URL here]_
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| AI | Google Gemini (AI Studio API) |
+| Email | Resend |
+| Database | Supabase (PostgreSQL) |
+| Testing | Vitest |
+| Deployment | Vercel |
+
+---
+
+## 🧠 Architecture
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── audits/[id]/     → Fetch saved audit by ID
+│   │   ├── leads/           → Capture lead + run audit + send email
+│   │   └── og/[id]/         → OG image generation for social sharing
+│   └── results/[id]/        → Shareable audit results page
+├── components/
+│   ├── SpendForm.tsx         → Multi-step form (tool entry)
+│   └── AuditResults.tsx      → Results dashboard
+└── lib/
+    ├── auditEngine.ts        → Core 4-check savings logic
+    ├── pricingData.ts        → Tool pricing + capability definitions
+    └── server/
+        └── email.ts          → Resend email delivery (non-blocking)
+```
+
+**Data flow:**
+1. User fills SpendForm → submits tool stack with billing/usage metadata
+2. `/api/leads` captures lead, runs `auditTools()`, persists to Supabase
+3. Results rendered at `/results/[id]` with shareable link
+4. Confirmation email sent via Resend (non-blocking — never interrupts audit flow)
+
+---
+
+## ⚙️ Audit Engine — How It Works
+
+The core `auditTools()` function in `auditEngine.ts` runs **4 checks per tool**, picks the best candidate by score, and returns ranked results:
+
+| Check | When it runs | What it finds |
+|---|---|---|
+| **Right-sizing** | `subscription` / `hybrid` billing | Cheaper plan within same vendor |
+| **Cross-tool alternative** | `subscription` / `hybrid` billing | Compatible cheaper tool for your use case |
+| **API vs. subscription** | `subscription` billing, Claude/ChatGPT | Whether pay-per-use would be cheaper |
+| **API cost-benefit** | `api` / `hybrid` billing | Whether a flat subscription would be cheaper |
+
+Underutilized seats (< 50% active users) are flagged as **critical priority** before any of the above — unused licenses are pure waste with zero switching risk.
+
+Capability compatibility uses **dynamic per-use-case weightings** — e.g. `coding` heavily weights `agentEditing` and `codingDepth`, while `research` weights `longContextSupport` and `dataAnalysisStrength`. Alternatives below 75% compatibility are filtered out.
+
+---
+
+## ⚖️ Decisions — 5 Trade-offs & Why
+
+### 1. Non-blocking email delivery
+**Decision:** Email failures never interrupt the audit. Leads and audits are persisted to Supabase first; email is fire-and-forget with full error logging.  
+**Why:** A Resend quota limit or unverified domain shouldn't mean users lose their results. The core value — audit + results page — always works regardless of email status.
+
+### 2. Four separate check functions over one black-box scorer
+**Decision:** Named check functions (`checkRightSize`, `checkCrossToolAlternative`, `checkApiVsSubscription`, `compareApiBillingToSubscription`) rather than a single scoring model.  
+**Why:** Each check has different logic, inputs, and confidence levels. Keeping them separate makes recommendations auditable, testable, and easy to extend — a reviewer can trace exactly why a recommendation was made.
+
+### 3. Dynamic capability weighting per use case
+**Decision:** Compatibility scores use different weights depending on whether the use case is `coding`, `research`, `data`, `writing`, etc.  
+**Why:** A tool that scores 90% for writing might score 60% for coding. A single global weight would generate misleading compatibility scores and bad recommendations. The added complexity is justified by accuracy.
+
+### 4. Billing type as a first-class input field
+**Decision:** Every tool entry has an explicit `billingType` (`subscription` / `api` / `hybrid`) which gates which checks run.  
+**Why:** Seat-based and usage-based tools need fundamentally different optimization strategies. Applying seat-count logic to an API tool produces nonsensical recommendations. Explicit billing type prevents this at the data layer.
+
+### 5. Google Gemini (AI Studio) for the AI summary
+**Decision:** AI-generated audit summaries use Google Gemini via the AI Studio API rather than OpenAI or Anthropic.  
+**Why:** Google AI Studio's free tier is generous for demo-scale usage with no credit card required. For a hard-deadline internship project, unblocking development immediately mattered more than provider preference. The call is isolated to one function — swapping providers later is a one-line change.

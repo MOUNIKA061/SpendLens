@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 import { TOOLS } from '@/lib/pricingData'
 import { clearDraft, getDraft, saveAudit, saveDraft } from '@/lib/storage'
-import { AuditInput, SpendFormDraft, ToolInput, UseCase, PrimaryUseCase } from '@/types'
+import { AuditInput, ToolInput, UseCase, PrimaryUseCase } from '@/types'
 // Global use case options: only PrimaryUseCase for team-level fallback
 const USE_CASES: PrimaryUseCase[] = ['coding', 'writing', 'data', 'research', 'mixed']
 

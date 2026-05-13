@@ -1,4 +1,4 @@
-# Accessibility & Performance (Phase 5)
+# Accessibility & Performance
 
 ## Completed Improvements
 

@@ -1,82 +1,58 @@
 # Pricing Data Traceability
 
-This document records the source of truth for every plan price used in `src/lib/pricingData.ts`.
+Source of truth for every plan price in `src/lib/pricingData.ts`.  
+All prices verified: **2026-05-12**
 
-Verified date for all entries below: 2026-05-12
+---
 
-## cursor (Cursor)
+## Cursor
+- Hobby: $0/seat — https://cursor.com/pricing — verified 2026-05-12
+- Pro: $20/seat — https://cursor.com/pricing — verified 2026-05-12
+- Business: $40/seat — https://cursor.com/pricing — verified 2026-05-12
 
-- Official pricing URL: https://cursor.com/pricing
-- Plan prices:
-  - Hobby: $0/seat
-  - Pro: $20/seat
-  - Business: $40/seat
-- Notes: Seat-based pricing only. Business plan is modeled as scalable with no fixed max seat limit.
+## GitHub Copilot
+- Individual: $10/seat — https://github.com/features/copilot#pricing — verified 2026-05-12
+- Business: $19/seat — https://github.com/features/copilot#pricing — verified 2026-05-12
+- Enterprise: $39/seat — https://github.com/features/copilot#pricing — verified 2026-05-12
 
-## github_copilot (GitHub Copilot)
+## Claude (claude.ai)
+- Free: $0/seat — https://claude.ai/pricing — verified 2026-05-12
+- Pro: $20/seat — https://claude.ai/pricing — verified 2026-05-12
+- Max: $100/seat — https://claude.ai/pricing — verified 2026-05-12
+- Team: $30/seat — https://claude.ai/pricing — verified 2026-05-12
+- Enterprise: custom/not publicly priced — https://claude.ai/pricing — verified 2026-05-12
 
-- Official pricing URL: https://github.com/features/copilot#pricing
-- Plan prices:
-  - Individual: $10/seat
-  - Business: $19/seat
-  - Enterprise: $39/seat
-- Notes: Seat-based pricing only. We treat each active user as one seat.
+## ChatGPT (OpenAI)
+- Free: $0/seat — https://openai.com/pricing — verified 2026-05-12
+- Plus: $20/seat — https://openai.com/pricing — verified 2026-05-12
+- Team: $30/seat — https://openai.com/pricing — verified 2026-05-12
+- Enterprise: custom/not publicly priced — https://openai.com/pricing — verified 2026-05-12
 
-## claude (Claude)
+## Anthropic API
+- Usage-based (token pricing) — https://www.anthropic.com/pricing — verified 2026-05-12
+- Example: claude-3-5-sonnet — $3.00/1M input tokens, $15.00/1M output tokens
+- Modeled as usage-based; no seat count applied
 
-- Official pricing URL: https://claude.ai/pricing
-- Plan prices:
-  - Free: $0/seat
-  - Pro: $20/seat
-  - Max: $100/seat
-  - Team: $30/seat
-  - Enterprise: custom / not publicly priced
-- Notes: Enterprise pricing is intentionally modeled as custom. Seat-based plans are used for subscription comparison; API usage is modeled separately.
+## OpenAI API
+- Usage-based (token pricing) — https://openai.com/pricing — verified 2026-05-12
+- Example: gpt-4o — $2.50/1M input tokens, $10.00/1M output tokens
+- Modeled as usage-based; no seat count applied
 
-## chatgpt (ChatGPT)
+## Gemini (Google)
+- Free: $0/seat — https://gemini.google.com/pricing — verified 2026-05-12
+- Pro: $20/seat — https://gemini.google.com/pricing — verified 2026-05-12
+- Ultra: custom/not publicly priced — https://gemini.google.com/pricing — verified 2026-05-12
+- API: usage-based — https://ai.google.dev/pricing — verified 2026-05-12
 
-- Official pricing URL: https://openai.com/pricing
-- Plan prices:
-  - Plus: $20/seat
-  - Team: $30/seat
-  - Enterprise: custom / not publicly priced
-- Notes: Enterprise pricing is custom. Public plan prices are per seat.
+## Windsurf
+- Free: $0/seat — https://windsurf.ai/pricing — verified 2026-05-12
+- Pro: $15/seat — https://windsurf.ai/pricing — verified 2026-05-12
+- Teams: $35/seat — https://windsurf.ai/pricing — verified 2026-05-12
 
-## anthropic_api (Anthropic API)
-
-- Official pricing URL: https://www.anthropic.com/pricing/claude
-- Plan prices:
-  - Usage-based API pricing (token-based)
-- Notes: Modeled as usage-based rather than per-seat. We use estimated token volumes and request counts for analysis.
-
-## openai_api (OpenAI API)
-
-- Official pricing URL: https://openai.com/pricing/gpt-4-api
-- Plan prices:
-  - Usage-based API pricing (token-based)
-- Notes: Modeled as usage-based rather than per-seat. We estimate request volume and request size.
-
-## gemini (Gemini)
-
-- Official pricing URL: https://gemini.google.com/pricing
-- Plan prices:
-  - Pro: $20/seat
-  - Ultra: custom / not publicly priced
-  - API: usage-based / not publicly priced
-- Notes: API and Ultra plans are treated as non-seat-based when price is unavailable.
-
-## windsurf (Windsurf)
-
-- Official pricing URL: https://windsurf.ai/pricing
-- Plan prices:
-  - Free: $0/seat
-  - Pro: $15/seat
-  - Teams: $35/seat
-- Notes: Teams/enterprise mapping uses the closest public seat-based plan as a benchmark.
+---
 
 ## Assumptions
-
-- Seat count equals an active user unless a hybrid/API billing type is selected.
-- API usage is estimated from monthly tokens, monthly API calls, or workload volume.
-- Public enterprise pricing is treated as custom and not inferred.
-- All pricing was verified against the official URLs above on 2026-05-12.
+- Seat count = active users unless `billingType` is `api` or `hybrid`
+- API usage modeled from estimated monthly tokens/calls, not seats
+- Enterprise pricing treated as custom and never inferred
+- All numbers pulled directly from official vendor pricing pages on 2026-05-12

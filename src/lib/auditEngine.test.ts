@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import type { AuditInput } from '@/types'
 import { auditTools } from './auditEngine'
 
 describe('auditTools', () => {
@@ -8,7 +9,7 @@ describe('auditTools', () => {
   })
 
   it('detects underutilization and suggests eliminating unused licenses', () => {
-    const input = {
+    const input: AuditInput = {
       teamSize: 10,
       useCase: 'coding',
       tools: [
@@ -19,9 +20,11 @@ describe('auditTools', () => {
           monthlySpend: 400,
           activeUsers: 4,
           billingType: 'subscription',
+          useCase: 'coding',
+          usageFrequency: 'daily',
         },
       ],
-    } as any
+    }
 
     const res = auditTools(input)
     expect(res.length).toBeGreaterThan(0)
@@ -31,7 +34,7 @@ describe('auditTools', () => {
   })
 
   it('recommends right-sizing to a cheaper plan when available', () => {
-    const input = {
+    const input: AuditInput = {
       teamSize: 1,
       useCase: 'coding',
       tools: [
@@ -41,9 +44,11 @@ describe('auditTools', () => {
           seats: 1,
           monthlySpend: 40,
           billingType: 'subscription',
+          useCase: 'coding',
+          usageFrequency: 'daily',
         },
       ],
-    } as any
+    }
 
     const res = auditTools(input)
     expect(res.length).toBeGreaterThan(0)
@@ -53,7 +58,7 @@ describe('auditTools', () => {
   })
 
   it('suggests downgrading to a free plan when usage is occasional', () => {
-    const input = {
+    const input: AuditInput = {
       teamSize: 1,
       useCase: 'writing',
       tools: [
@@ -64,9 +69,10 @@ describe('auditTools', () => {
           monthlySpend: 50,
           usageFrequency: 'occasionally',
           billingType: 'subscription',
+          useCase: 'writing',
         },
       ],
-    } as any
+    }
 
     const res = auditTools(input)
     expect(res.length).toBeGreaterThan(0)
@@ -76,7 +82,7 @@ describe('auditTools', () => {
   })
 
   it('for API-billed tools suggests subscription alternatives when subscription is much cheaper', () => {
-    const input = {
+    const input: AuditInput = {
       teamSize: 1,
       useCase: 'writing',
       tools: [
@@ -86,9 +92,11 @@ describe('auditTools', () => {
           seats: 1,
           monthlySpend: 100,
           billingType: 'api',
+          useCase: 'writing',
+          usageFrequency: 'weekly',
         },
       ],
-    } as any
+    }
 
     const res = auditTools(input)
     expect(res.length).toBeGreaterThan(0)
@@ -102,7 +110,7 @@ describe('auditTools', () => {
     // Move system time far into the future so verifiedAt dates are stale (>30 days)
     vi.setSystemTime(new Date('2028-01-01'))
 
-    const input = {
+    const input: AuditInput = {
       teamSize: 2,
       useCase: 'research',
       tools: [
@@ -112,9 +120,11 @@ describe('auditTools', () => {
           seats: 1,
           monthlySpend: 20,
           billingType: 'subscription',
+          useCase: 'research',
+          usageFrequency: 'weekly',
         },
       ],
-    } as any
+    }
 
     const res = auditTools(input)
     expect(res.length).toBeGreaterThan(0)
