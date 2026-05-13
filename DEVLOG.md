@@ -1,4 +1,8 @@
 ```md id="n5x2fk"
+Commits on at least 5 distinct calendar days within the 7-day window. 
+
+<img width="1856" height="733" alt="Screenshot 2026-05-13 184543" src="https://github.com/user-attachments/assets/1923e509-bffa-47f3-91f6-a6459ca08f9d" />
+
 ## Day 1 — 2026-05-06
 
 **Hours worked:** 7
