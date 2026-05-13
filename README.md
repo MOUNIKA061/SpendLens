@@ -6,12 +6,30 @@
 
 ## 🖥️ Screenshots / Demo
 
-> **Screenshots / Demo:**
->
-> - SpendForm — tool entry with billing type, use case, usage frequency fields
-> - Audit Results — monthly/annual savings dashboard + top 3 recommendations
-> - Confirmation email with savings breakdown
->
+Landing Page
+
+<img width="2843" height="1632" alt="Screenshot 2026-05-13 181728" src="https://github.com/user-attachments/assets/70faf19b-d1ad-48c9-9a5a-62dc0fe6b920" />
+
+Audit step 1
+
+<img width="874" height="1257" alt="Screenshot 2026-05-13 182026" src="https://github.com/user-attachments/assets/ca67c053-7d44-4d31-b6a4-93080cb52933" />
+
+Audit step 2 
+
+<img width="2212" height="1243" alt="Screenshot 2026-05-13 182319" src="https://github.com/user-attachments/assets/ec1d7393-961c-4aa3-9e89-11428ac7935c" />
+
+Resend Email
+
+<img width="2085" height="1603" alt="Screenshot 2026-05-13 182401" src="https://github.com/user-attachments/assets/866cee25-3866-4f90-9c43-d14719e84374" />
+
+Result Page
+
+<img width="1655" height="1609" alt="Screenshot 2026-05-13 182424" src="https://github.com/user-attachments/assets/57b5d288-b511-4eb2-a4f9-383747dd706f" />
+
+Email Send 
+
+<img width="2642" height="1070" alt="Screenshot 2026-05-13 182915" src="https://github.com/user-attachments/assets/a1ebb8c2-58b6-48d6-9297-35890baeb20b" />
+
 > 🎥 **Demo Recording:** Not included in this repository snapshot
 
 ## ✨ What It Does
