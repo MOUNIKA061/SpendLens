@@ -30,7 +30,8 @@ Email Send
 
 <img width="2642" height="1070" alt="Screenshot 2026-05-13 182915" src="https://github.com/user-attachments/assets/a1ebb8c2-58b6-48d6-9297-35890baeb20b" />
 
-> 🎥 **Demo Recording:** Not included in this repository snapshot
+
+[🎥 Watch the Demo Recording](https://drive.google.com/file/d/1Y5CalGRXMfQKr_b8D6dHGHoKN6dpw5vz/view?usp=sharing)
 
 ## ✨ What It Does
 
