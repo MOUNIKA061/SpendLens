@@ -8,12 +8,6 @@ type ResultsPageProps = {
   searchParams?: Promise<{ saved?: string }>
 }
 
-function getSavedAmount(searchParams?: { saved?: string }): number {
-  const rawValue = searchParams?.saved ?? '0'
-  const parsedValue = Number(rawValue)
-  return Number.isFinite(parsedValue) ? parsedValue : 0
-}
-
 export async function generateMetadata({ params }: ResultsPageProps): Promise<Metadata> {
   const { id } = await params
   try {

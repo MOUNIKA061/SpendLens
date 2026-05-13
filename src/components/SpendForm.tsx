@@ -2,30 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 import { TOOLS } from '@/lib/pricingData'
 import { clearDraft, getDraft, saveAudit, saveDraft } from '@/lib/storage'
-import { AuditInput, SpendFormDraft, ToolInput, UseCase, PrimaryUseCase } from '@/types'
-
-const TOOL_IDS = Object.keys(TOOLS) as Array<keyof typeof TOOLS>
+import { AuditInput, ToolInput, UseCase, PrimaryUseCase } from '@/types'
 // Global use case options: only PrimaryUseCase for team-level fallback
 const USE_CASES: PrimaryUseCase[] = ['coding', 'writing', 'data', 'research', 'mixed']
-const DEFAULT_PLAN_ORDER = [
-  'hobby',
-  'individual',
-  'free',
-  'pro',
-  'plus',
-  'team',
-  'business',
-  'enterprise',
-  'max',
-  'teams',
-  'usage',
-  'api',
-  'ultra',
-]
 
 type BillingType = 'subscription' | 'api' | 'hybrid'
 type UsageFrequency = 'daily' | 'weekly' | 'occasionally'
@@ -251,26 +234,6 @@ function formatMoney(value: number): string {
   }).format(value)
 }
 
-function getDefaultPlanKey(toolId: keyof typeof TOOLS): string {
-  const planKeys = Object.keys(TOOLS[toolId].plans)
-  return DEFAULT_PLAN_ORDER.find((planKey) => planKeys.includes(planKey)) ?? planKeys[0] ?? 'pro'
-}
-
-function createTool(toolId: keyof typeof TOOLS): ToolInput {
-  const plan = getDefaultPlanKey(toolId)
-  const planConfig = TOOLS[toolId].plans as Record<string, { pricePerSeat: number | null }>
-
-  return {
-    toolId,
-    plan,
-    seats: 1, // Default for subscription/hybrid; optional for API
-    monthlySpend: planConfig[plan]?.pricePerSeat ?? 0,
-    billingType: 'subscription',
-    useCase: 'mixed',
-    usageFrequency: 'daily',
-  }
-}
-
 function normalizeDraft(draft: unknown) {
   const fallbackEntry = createRichToolEntry()
 
@@ -382,16 +345,20 @@ export function SpendForm() {
     [toolEntries],
   )
 
+  // Hydration effect - necessary for Next.js SSR (wrapped in setTimeout to prevent cascading renders)
   useEffect(() => {
     const draft = normalizeDraft(getDraft())
-    setStep(draft.step)
-    setCompanyName(draft.companyName)
-    setIndustry(draft.industry)
-    setEstimatedMonthlyBudget(draft.estimatedMonthlyBudget)
-    setTeamSize(draft.teamSize)
-    setUseCase(draft.useCase)
-    setToolEntries(draft.toolEntries)
-    setHydrated(true)
+    // Wrap setState calls in setTimeout to prevent cascading renders
+    setTimeout(() => {
+      setStep(draft.step)
+      setCompanyName(draft.companyName)
+      setIndustry(draft.industry)
+      setEstimatedMonthlyBudget(draft.estimatedMonthlyBudget)
+      setTeamSize(draft.teamSize)
+      setUseCase(draft.useCase)
+      setToolEntries(draft.toolEntries)
+      setHydrated(true)
+    }, 0)
   }, [])
 
   useEffect(() => {
@@ -405,7 +372,7 @@ export function SpendForm() {
       teamSize,
       useCase,
       toolEntries,
-    } as any)
+    } as SpendFormDraft)
   }, [
     hydrated,
     step,
@@ -456,44 +423,6 @@ export function SpendForm() {
           ...entry,
           [field]: value,
         }
-      }),
-    )
-  }
-
-  const updateTool = <K extends keyof ToolInput>(toolId: string, field: K, value: ToolInput[K]) => {
-    setToolEntries((prev) =>
-      prev.map((entry) => {
-        const auditTool = richToolEntryToAuditTool(entry)
-        if (auditTool.toolId !== toolId) {
-          return entry
-        }
-
-        if (field === 'plan') {
-          const providerPlans = TOOL_CONFIG[entry.providerId].plans
-          const matchedPlan = providerPlans.find(
-            (plan) => plan.auditPlan === value || plan.id === value,
-          )
-          return {
-            ...entry,
-            planId: matchedPlan?.id ?? entry.planId,
-          }
-        }
-
-        if (field === 'seats') {
-          return {
-            ...entry,
-            seats: Math.max(1, Number(value) || 1),
-          }
-        }
-
-        if (field === 'monthlySpend') {
-          return {
-            ...entry,
-            monthlySpend: Math.max(0, Number(value) || 0),
-          }
-        }
-
-        return entry
       }),
     )
   }

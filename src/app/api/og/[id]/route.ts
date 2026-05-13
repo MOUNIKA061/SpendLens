@@ -3,7 +3,9 @@ import { createElement } from 'react'
 
 import { getAuditRecord } from '@/lib/server/persistence'
 
-export async function GET(_req: Request, context: any) {
+type RouteContext = { params: Promise<{ id: string }> }
+
+export async function GET(_req: Request, context: RouteContext) {
   const params = await context?.params
   const id = typeof params?.id === 'string' ? params.id : ''
   const audit = await getAuditRecord(id)

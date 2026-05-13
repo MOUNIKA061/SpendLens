@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 
 import { deleteAuditRecord, getAuditRecord } from '@/lib/server/persistence'
 
-export async function GET(_req: Request, context: any) {
+type RouteContext = { params: Promise<{ id: string }> }
+
+export async function GET(_req: Request, context: RouteContext) {
   try {
     const params = await context?.params
     const id = typeof params?.id === 'string' ? params.id : ''
@@ -15,7 +17,7 @@ export async function GET(_req: Request, context: any) {
   }
 }
 
-export async function DELETE(_req: Request, context: any) {
+export async function DELETE(_req: Request, context: RouteContext) {
   try {
     const params = await context?.params
     const id = typeof params?.id === 'string' ? params.id : ''

@@ -255,7 +255,9 @@ export function AuditResults({ auditId }: { auditId: string }) {
                           honeypot: '',
                         }),
                       }).finally(() => {
-                        el && (el.value = '')
+                        if (el) {
+                          el.value = ''
+                        }
                         alert('Thanks — we will notify you when new optimizations are available.')
                       })
                     }}
@@ -345,12 +347,12 @@ export function AuditResults({ auditId }: { auditId: string }) {
                     </div>
 
                     <p className="mt-4 text-sm leading-6 text-slate-300">{result.reason}</p>
-                    {hasSavings ? (
+                    {hasSavings && (
                       <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-medium text-emerald-200">
-                        <CheckCircle2 className="h-4 w-4" />
+                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                         {formatMoney(result.monthlySavings)} monthly savings
                       </div>
-                    ) : null}
+                    )}
                   </article>
                 )
               })}

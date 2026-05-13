@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     // STEP 1: Save lead record to Supabase or JSON
     // This MUST succeed for the flow to continue
-    const saveResult = await saveLeadRecord({
+    await saveLeadRecord({
       email: payload.email,
       companyName: payload.companyName,
       role: payload.role,

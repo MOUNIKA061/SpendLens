@@ -14,11 +14,6 @@ function buildConfirmationHtml(lead: LeadRecord, audit: FullAudit): string {
   // Format savings with thousands separator
   const formatCurrency = (num: number) => `$${Math.round(num).toLocaleString()}`
 
-  // Find top opportunity
-  const topOpportunity = audit.results.reduce((best, current) =>
-    current.monthlySavings > best.monthlySavings ? current : best,
-  )
-
   // Credex callout for high-savings audits
   const credexSection =
     audit.totalMonthlySavings > 500

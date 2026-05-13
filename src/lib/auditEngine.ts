@@ -16,7 +16,6 @@ type PlanConfig = { label: string; pricePerSeat: number | null; maxSeats: number
 const CREDEX_DISCOUNT = 0.15
 const CREDEX_MIN_MONTHLY_THRESHOLD = 50
 const CAPABILITY_COMPATIBILITY_THRESHOLD = 0.75
-const MIN_SWITCHING_ROI_THRESHOLD = 50
 const HOURLY_RATE_DEFAULT = 100
 const ONBOARDING_HOURS = { low: 2, medium: 6, high: 12 }
 
@@ -596,20 +595,16 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
     const utilizationPercent = tool.utilizationPercent
 
     // API/Hybrid: use usage-based metrics
-    const monthlyTokens = tool.monthlyTokens
-    const monthlyApiCalls = tool.monthlyApiCalls
-
     const candidates: Candidate[] = []
 
     // Validate pricing freshness and surface warning if stale
     const freshness = validatePricingFreshness(toolConfig.pricingVerifiedAt)
-    let pricingWarning = freshness.isStale
-    if (pricingWarning) {
-      // Will surface warning in final recommendation reason
+    const pricingWarning = freshness.isStale
+    const billingTypeValid = validateBillingTypeSeats(billingType, seats)
+    if (!billingTypeValid.valid) {
+      // Log validation message for debugging but continue processing
+      console.debug('[AUDIT] Billing type validation:', billingTypeValid.message)
     }
-
-    // Validate billing type constraints
-    const validation = validateBillingTypeSeats(billingType, seats)
 
     // UNDERUTILIZATION DETECTION - HIGHEST PRIORITY
     // Unused seats are pure waste with zero risk (unlike vendor switches which carry adoption risk).
@@ -777,7 +772,8 @@ export function auditTools(input: AuditInput): ToolAuditResult[] {
   })
 
   // Store total spend for percentage calculations in caller
-  ;(finalResults as any)._totalCurrentSpend = totalCurrentSpend
+  const resultsWithTotal = finalResults as (typeof finalResults) & { _totalCurrentSpend: number }
+  resultsWithTotal._totalCurrentSpend = totalCurrentSpend
 
-  return finalResults
+  return resultsWithTotal
 }
