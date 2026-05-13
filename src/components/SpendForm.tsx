@@ -372,7 +372,7 @@ export function SpendForm() {
       teamSize,
       useCase,
       toolEntries,
-    } as unknown as SpendFormDraft)
+    })
   }, [
     hydrated,
     step,

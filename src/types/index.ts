@@ -87,10 +87,12 @@ export type FullAudit = {
 
 export type SpendFormDraft = {
   step: number
-  selectedTools: string[]
-  tools: ToolInput[]
+  companyName: string
+  industry: string
+  estimatedMonthlyBudget: number
   teamSize: number
   useCase: UseCase
+  toolEntries: unknown[]
 }
 
 export type LeadSubmission = {
